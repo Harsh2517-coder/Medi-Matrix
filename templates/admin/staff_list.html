@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2>Hospital Staff & Doctors</h2>
+    <a href="{{ url_for('admin.dashboard') }}" class="btn btn-secondary">Back to Dashboard</a>
+</div>
+
+<h3>Doctors</h3>
+<div class="table-responsive mb-5">
+    <table class="table table-striped">
+        <thead class="table-primary">
+            <tr>
+                <th>Name</th>
+                <th>Specialization</th>
+                <th>Contact Number</th>
+                <th>Hire Date</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for doctor in doctors %}
+            <tr>
+                <td>Dr. {{ doctor.FirstName }} {{ doctor.LastName }}</td>
+                <td>{{ doctor.SpecializationName }}</td>
+                <td>{{ doctor.ContactNumber }}</td>
+                <td>{{ doctor.HireDate.strftime('%d %b, %Y') }}</td>
+            </tr>
+            {% else %}
+            <tr>
+                <td colspan="4" class="text-center">No doctors found.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<h3>Administrative & Accounts Staff</h3>
+<div class="table-responsive">
+    <table class="table table-striped">
+        <thead class="table-dark">
+            <tr>
+                <th>Name</th>
+                <th>Position</th>
+                <th>Username</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for staff in other_staff %}
+            <tr>
+                <td>{{ staff.FirstName }} {{ staff.LastName }}</td>
+                <td>{{ staff.Position }}</td>
+                <td>{{ staff.Username }}</td>
+            </tr>
+            {% else %}
+            <tr>
+                <td colspan="3" class="text-center">No other staff found.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

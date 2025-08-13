@@ -1,0 +1,167 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2>Accountant Dashboard 💰</h2>
+</div>
+
+<h3>Patient Invoices & Receipts</h3>
+<div class="table-responsive">
+    <table class="table table-striped table-hover">
+        <thead class="table-dark">
+            <tr>
+                <th>Invoice #</th>
+                <th>Patient Name</th>
+                <th>Date</th>
+                <th>Status</th>
+                <th class="text-end">Amount (₹)</th>
+                <th class="text-center">Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for invoice in invoices %}
+            <tr>
+                <td>{{ invoice.InvoiceID }}</td>
+                <td>{{ invoice.FirstName }} {{ invoice.LastName }}</td>
+                <td>{{ invoice.InvoiceDate.strftime('%Y-%m-%d') }}</td>
+                <td><span class="badge bg-info">{{ invoice.Status }}</span></td>
+                <td class="text-end">{{ "%.2f"|format(invoice.TotalAmount) }}</td>
+                <td class="text-center">
+                    <a href="{{ url_for('accounts.generate_invoice_pdf', invoice_id=invoice.InvoiceID) }}" class="btn btn-sm btn-danger" target="_blank">
+                        View PDF Receipt
+                    </a>
+                </td>
+            </tr>
+            {% else %}
+            <tr>
+                <td colspan="6" class="text-center">No invoices found.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<hr class="my-5">
+
+<div class="row">
+    <div class="col-lg-7 mb-4">
+        <h3>Hospital Expenses</h3>
+        <div class="table-responsive table-scrollable">
+            <table class="table table-striped table-hover">
+                <thead class="table-dark sticky-top">
+                    <tr>
+                        <th>Date</th>
+                        <th>Category</th>
+                        <th>Amount (₹)</th>
+                        <th>Description</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for expense in expenses %}
+                    <tr>
+                        <td>{{ expense.ExpenseDate.strftime('%Y-%m-%d') }}</td>
+                        <td>{{ expense.Category }}</td>
+                        <td>{{ "%.2f"|format(expense.Amount) }}</td>
+                        <td>{{ expense.Description }}</td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="4" class="text-center">No expenses recorded yet.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <div class="col-lg-5 mb-4">
+        <h3>Add New Expense</h3>
+        <div class="card">
+            <div class="card-body">
+                <form action="{{ url_for('accounts.add_expense') }}" method="POST">
+                    <div class="mb-3">
+                        <label for="expense_date" class="form-label">Date</label>
+                        <input type="date" class="form-control" id="expense_date" name="expense_date" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="category" class="form-label">Category</label>
+                        <input type="text" class="form-control" id="category" name="category" placeholder="e.g., Medical Supplies" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="amount" class="form-label">Amount (₹)</label>
+                        <input type="number" step="0.01" class="form-control" id="amount" name="amount" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="description" class="form-label">Description</label>
+                        <textarea class="form-control" id="description" name="description" rows="2"></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100">Add Expense</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<hr class="my-5">
+
+<div class="row">
+    <div class="col-lg-7 mb-4">
+        <h3>Salary Payments</h3>
+        <div class="table-responsive table-scrollable">
+            <table class="table table-striped table-hover">
+                <thead class="table-dark sticky-top">
+                    <tr>
+                        <th>Payment Date</th>
+                        <th>Recipient</th>
+                        <th>Amount (₹)</th>
+                        <th>Notes</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for salary in salaries %}
+                    <tr>
+                        <td>{{ salary.PaymentDate.strftime('%Y-%m-%d') }}</td>
+                        <td>{{ salary.Username }} ({{ salary.FirstName }} {{ salary.LastName }})</td>
+                        <td>{{ "%.2f"|format(salary.Amount) }}</td>
+                        <td>{{ salary.Notes }}</td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="4" class="text-center">No salary payments recorded.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <div class="col-lg-5 mb-4">
+        <h3>Record Salary Payment</h3>
+        <div class="card">
+            <div class="card-body">
+                <form action="{{ url_for('accounts.add_salary') }}" method="POST">
+                    <div class="mb-3">
+                        <label for="payment_date" class="form-label">Payment Date</label>
+                        <input type="date" class="form-control" id="payment_date" name="payment_date" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="user_id" class="form-label">Staff Member</label>
+                        <select class="form-select" id="user_id" name="user_id" required>
+                            <option selected disabled value="">Choose staff...</option>
+                            {% for staff in staff_users %}
+                            <option value="{{ staff.UserID }}">{{ staff.Username }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="salary_amount" class="form-label">Amount (₹)</label>
+                        <input type="number" step="0.01" class="form-control" id="salary_amount" name="amount" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="notes" class="form-label">Notes</label>
+                        <input type="text" class="form-control" id="notes" name="notes" placeholder="e.g., Salary for August 2025">
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100">Record Payment</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

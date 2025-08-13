@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2>Doctor's Dashboard 🩺</h2>
+    <div>
+        <a href="{{ url_for('doctor.patient_list') }}" class="btn btn-info">My Patients</a>
+        <a href="{{ url_for('doctor.salary_history') }}" class="btn btn-secondary">Salary History</a>
+    </div>
+</div>
+
+<h4>My Appointments</h4>
+<div class="table-responsive">
+    <table class="table table-hover table-striped">
+        <thead>
+            <tr>
+                <th>Date & Time</th>
+                <th>Patient Name</th>
+                <th>Reason for Visit</th>
+                <th>Status</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for app in appointments %}
+            <tr>
+                <td>{{ app.AppointmentDateTime.strftime('%d %b %Y, %I:%M %p') }}</td>
+                <td>{{ app.FirstName }} {{ app.LastName }}</td>
+                <td>{{ app.Reason }}</td>
+                <td>
+                    {% if app.Status == 'Confirmed' %}
+                        <span class="badge bg-primary">{{ app.Status }}</span>
+                    {% elif app.Status == 'Completed' %}
+                        <span class="badge bg-success">{{ app.Status }}</span>
+                    {% elif app.Status == 'Cancelled' %}
+                        <span class="badge bg-danger">{{ app.Status }}</span>
+                    {% elif app.Status == 'No Show' %}
+                        <span class="badge bg-warning text-dark">{{ app.Status }}</span>
+                    {% else %}
+                        <span class="badge bg-secondary">{{ app.Status }}</span>
+                    {% endif %}
+                </td>
+            </tr>
+            {% else %}
+            <tr>
+                <td colspan="4" class="text-center">You have no appointments scheduled.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

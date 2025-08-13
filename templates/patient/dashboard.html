@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>My Appointment History</h2>
+<a href="{{ url_for('patient.book_appointment') }}" class="btn btn-success mb-3">Book New Appointment</a>
+
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>Date & Time</th>
+            <th>Doctor</th>
+            <th>Specialization</th>
+            <th>Status</th>
+            <th>Diagnosis</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for app in appointments %}
+        <tr>
+            <td>{{ app.AppointmentDateTime.strftime('%Y-%m-%d %I:%M %p') }}</td>
+            <td>Dr. {{ app.FirstName }} {{ app.LastName }}</td>
+            <td>{{ app.SpecializationName }}</td>
+            <td><span class="badge bg-info">{{ app.Status }}</span></td>
+            <td>{{ app.Diagnosis if app.Diagnosis else 'N/A' }}</td>
+        </tr>
+        {% else %}
+        <tr>
+            <td colspan="5">You have no appointments.</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

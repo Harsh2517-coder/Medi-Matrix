@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2>My Patient List</h2>
+    <a href="{{ url_for('doctor.dashboard') }}" class="btn btn-secondary">Back to Dashboard</a>
+</div>
+
+<div class="table-responsive">
+    <table class="table table-striped">
+        <thead class="table-dark">
+            <tr>
+                <th>Patient Name</th>
+                <th>Date of Birth</th>
+                <th>Contact Number</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for patient in patients %}
+            <tr>
+                <td>{{ patient.FirstName }} {{ patient.LastName }}</td>
+                <td>{{ patient.DateOfBirth.strftime('%d %B, %Y') }}</td>
+                <td>{{ patient.ContactNumber }}</td>
+            </tr>
+            {% else %}
+            <tr>
+                <td colspan="3" class="text-center">You have not treated any patients yet.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2>My Salary History</h2>
+    <a href="{{ url_for('doctor.dashboard') }}" class="btn btn-secondary">Back to Dashboard</a>
+</div>
+
+<div class="table-responsive">
+    <table class="table table-bordered">
+        <thead class="table-primary">
+            <tr>
+                <th>Payment Date</th>
+                <th>Amount (₹)</th>
+                <th>Notes</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for salary in salaries %}
+            <tr>
+                <td>{{ salary.PaymentDate.strftime('%d %B, %Y') }}</td>
+                <td>₹ {{ "%.2f"|format(salary.Amount) }}</td>
+                <td>{{ salary.Notes }}</td>
+            </tr>
+            {% else %}
+            <tr>
+                <td colspan="3" class="text-center">No salary records found.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

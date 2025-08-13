@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>Book an Appointment</h2>
+<form method="POST" id="booking-form" data-doctors='{{ doctors|tojson|safe }}'>
+    <div class="mb-3">
+        <label for="specialization" class="form-label">Select Specialization</label>
+        <select class="form-select" id="specialization" name="specialization" required>
+            <option selected disabled value="">Choose...</option>
+            {% for spec in specializations %}
+            <option value="{{ spec.SpecializationID }}">{{ spec.SpecializationName }}</option>
+            {% endfor %}
+        </select>
+    </div>
+    <div class="mb-3">
+        <label for="doctor" class="form-label">Select Doctor</label>
+        <select class="form-select" id="doctor" name="doctor" required>
+            <option selected disabled value="">Select a specialization first</option>
+        </select>
+    </div>
+    <div class="mb-3">
+        <label for="appointment_date" class="form-label">Preferred Date</label>
+        <input type="date" class="form-control" id="appointment_date" name="appointment_date" min="{{ min_date }}" required>
+    </div>
+     <div class="mb-3">
+        <label for="appointment_time" class="form-label">Preferred Time</label>
+        <input type="time" class="form-control" id="appointment_time" name="appointment_time" required>
+    </div>
+    <div class="mb-3">
+        <label for="reason" class="form-label">Reason for Visit</label>
+        <textarea class="form-control" id="reason" name="reason" rows="3" required></textarea>
+    </div>
+    <button type="submit" class="btn btn-primary">Request Appointment</button>
+</form>
+{% endblock %}
+
+{% block scripts %}
+<script>
+// JavaScript for dynamic doctor dropdown
+document.addEventListener('DOMContentLoaded', function() {
+    const bookingForm = document.getElementById('booking-form');
+    if (!bookingForm) return;
+
+    const allDoctors = JSON.parse(bookingForm.dataset.doctors);
+    const specializationSelect = document.getElementById('specialization');
+    const doctorSelect = document.getElementById('doctor');
+
+    specializationSelect.addEventListener('change', function() {
+        const specId = this.value;
+        doctorSelect.innerHTML = '<option selected disabled value="">Choose a doctor...</option>';
+        const filteredDoctors = allDoctors.filter(doctor => doctor.SpecializationID == specId);
+        
+        filteredDoctors.forEach(doctor => {
+            const option = document.createElement('option');
+            option.value = doctor.DoctorID;
+            option.textContent = `Dr. ${doctor.FirstName} ${doctor.LastName}`;
+            doctorSelect.appendChild(option);
+        });
+    });
+});
+</script>
+{% endblock %}

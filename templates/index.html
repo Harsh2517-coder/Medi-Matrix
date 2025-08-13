@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="p-5 mb-4 bg-light rounded-3">
+    <div class="container-fluid py-5">
+        <h1 class="display-5 fw-bold">Welcome to MediMatrix</h1>
+        <p class="col-md-8 fs-4">Your integrated Hospital Management System for seamless patient care, doctor scheduling, and administrative operations.</p>
+        <hr class="my-4">
+        <p>Access your portal to manage appointments, view records, and streamline your workflow.</p>
+        <a class="btn btn-primary btn-lg" href="{{ url_for('auth.login') }}" role="button">Login to Your Portal</a>
+    </div>
+</div>
+
+<div class="row align-items-md-stretch">
+    <div class="col-md-6 mb-4">
+        <div class="h-100 p-5 text-white bg-dark rounded-3">
+            <h2>For Patients 🧑‍⚕️</h2>
+            <p>Easily access your complete medical history, view past diagnoses, and book new appointments with your preferred specialist in just a few clicks.</p>
+        </div>
+    </div>
+    <div class="col-md-6 mb-4">
+        <div class="h-100 p-5 bg-body-secondary border rounded-3">
+            <h2>For Doctors & Staff 🩺</h2>
+            <p>Manage your schedule, access patient records, and handle administrative tasks with our powerful and intuitive dashboards designed for efficiency.</p>
+        </div>
+    </div>
+</div>
+{% endblock %}

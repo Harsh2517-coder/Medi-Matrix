@@ -65,3 +65,29 @@ python -m venv venv
 
 # Install the required packages
 pip install -r requirements.txt
+## 🚀 How to Run This Project
+
+Follow these steps to get the project running locally.
+
+### 1. Prerequisites
+* Python 3.x
+* Git
+* A running MySQL Server
+* GTK+ for Windows (if on Windows, for PDF generation). See [installation guide](https://doc.courtbouillon.org/weasyprint/stable/first_steps.html#windows).
+
+### 2. Clone & Setup
+```bash
+# 1. Clone the repository from GitHub
+git clone [https://github.com/your-username/your-repository-name.git](https://github.com/your-username/your-repository-name.git)
+cd your-repository-name
+
+# 2. Create and activate a virtual environment (highly recommended)
+python -m venv venv
+
+# On Windows:
+# venv\Scripts\activate
+# On macOS/Linux:
+# source venv/bin/activate
+
+# 3. Install all required packages from the requirements file
+pip install -r requirements.txt

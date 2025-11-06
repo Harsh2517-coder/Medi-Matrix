@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # MediMatrix - Hospital Management System
 
 A comprehensive, modern hospital management system built with Python Flask and MySQL. This application provides a complete role-based solution for managing hospital operations with beautiful, responsive UI design.
@@ -341,3 +342,6 @@ For issues or questions:
 ---
 
 **Built with ❤️ using Flask and modern web technologies**
+=======
+# Medi-Matrix
+>>>>>>> f120e06e37d626f5490e5fda2aa9ee1f1b2a9ede

@@ -1,0 +1,983 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Login - MediMatrix</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    
+    <!-- OVERRIDE BOOTSTRAP IMMEDIATELY -->
+    <style>
+        /* Override Bootstrap card styles BEFORE other styles */
+        .card,
+        .card.shadow-sm,
+        .card:hover,
+        .card.shadow-sm:hover {
+            transform: none !important;
+            transition: none !important;
+            animation: none !important;
+        }
+    </style>
+    
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+
+        /* Enhanced Medical Color Palette */
+        :root {
+            --hospital-blue: #1e40af;        /* Deep medical blue */
+            --hospital-green: #059669;       /* Medical green */
+            --hospital-teal: #0891b2;        /* Surgical teal */
+            --accent-red: #dc2626;           /* Emergency red */
+            --medical-mint: #10b981;         /* Fresh medical mint */
+            --sterile-white: #ffffff;
+            --medical-gray: #64748b;
+            --deep-navy: #0f172a;            /* Professional navy */
+            --light-clinical: #f8fafc;       /* Clinical light background */
+            --pulse-glow: rgba(16,185,129,0.4); /* Heart monitor glow */
+            --grid-medical: rgba(30,64,175,0.08);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body.bg-light {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif !important;
+            background:
+                /* Medical cross pattern */
+                radial-gradient(circle at 15% 25%, rgba(16,185,129,0.12), transparent 45%),
+                radial-gradient(circle at 85% 75%, rgba(30,64,175,0.12), transparent 45%),
+                /* Sterile gradient base */
+                linear-gradient(135deg, #f8fafc 0%, #e2e8f0 25%, #cbd5e1 50%, #94a3b8 100%) !important;
+            background-size: 800px 800px, 600px 600px, 100% 100% !important;
+            background-position: 0% 0%, 100% 100%, 0% 0% !important;
+            animation: none !important;
+            min-height: 100vh;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        /* Medical grid pattern - like hospital floor tiles */
+        body.bg-light::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background:
+                repeating-linear-gradient(0deg, var(--grid-medical) 0 1px, transparent 1px 40px),
+                repeating-linear-gradient(90deg, var(--grid-medical) 0 1px, transparent 1px 40px),
+                /* Medical cross pattern */
+                repeating-linear-gradient(45deg, transparent 0 15px, rgba(16,185,129,0.03) 15px 17px, transparent 17px 32px);
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        /* Heartbeat pulse effect - DISABLED */
+        body.bg-light::after {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                radial-gradient(circle at 50% 50%, rgba(16,185,129,0.08) 0%, transparent 60%);
+            background-size: 300% 300%;
+            background-position: 50% 50% !important;
+            animation: none !important;
+            transform: scale(1) !important;
+            opacity: 0.3 !important;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .container {
+            position: relative;
+            z-index: 2;
+            transform: none !important;
+            animation: none !important;
+            transition: none !important;
+            width: 100%;
+            max-width: 100%;
+            margin: 0 auto;
+            padding: 0 15px;
+        }
+
+        /* COMPLETE STABILITY - NO MOVEMENT WHATSOEVER */
+        /* Prevent any element from moving on hover */
+        *:hover {
+            transform: none !important;
+            translate: none !important;
+            scale: none !important;
+        }
+        
+        /* Ensure card and all children stay fixed */
+        .card,
+        .card *,
+        .card:hover,
+        .card:hover *,
+        .card:focus,
+        .card:focus *,
+        .card:active,
+        .card:active * {
+            transform: none !important;
+            translate: none !important;
+            scale: none !important;
+            transition: none !important;
+            animation: none !important;
+            will-change: auto !important;
+        }
+        
+        .card,
+        .card *,
+        .card.shadow-sm,
+        .card.shadow-sm *,
+        .card.shadow-sm:hover,
+        .card.shadow-sm:hover *,
+        .card.shadow-sm:focus,
+        .card.shadow-sm:focus *,
+        .card.shadow-sm:active,
+        .card.shadow-sm:active *,
+        .card.shadow-sm:focus-within,
+        .card.shadow-sm:focus-within *,
+        .card:hover,
+        .card:hover *,
+        .card:focus,
+        .card:focus *,
+        .card:active,
+        .card:active * {
+            transform: none !important;
+            translate: none !important;
+            scale: none !important;
+            rotate: none !important;
+            transition: none !important;
+            animation: none !important;
+            will-change: auto !important;
+        }
+        
+        .card.shadow-sm {
+            background: rgba(255, 255, 255, 0.95) !important;
+            backdrop-filter: blur(25px) saturate(180%) !important;
+            border: 2px solid rgba(255, 255, 255, 0.8) !important;
+            border-radius: 32px !important;
+            box-shadow:
+                /* Stable, grounded shadow */
+                0 4px 12px rgba(15, 23, 42, 0.08),
+                0 2px 4px rgba(30, 64, 175, 0.06),
+                /* Subtle border */
+                0 0 0 1px rgba(255, 255, 255, 0.8),
+                inset 0 2px 0 rgba(255, 255, 255, 0.9) !important;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        /* Override ALL possible hover states */
+        .card.shadow-sm:hover,
+        .card.shadow-sm:focus,
+        .card.shadow-sm:active,
+        .card.shadow-sm:focus-within,
+        .card:hover.shadow-sm,
+        .card:focus.shadow-sm,
+        .card:active.shadow-sm {
+            transform: none !important;
+            translate: none !important;
+            scale: none !important;
+            rotate: none !important;
+            box-shadow:
+                0 4px 12px rgba(15, 23, 42, 0.08),
+                0 2px 4px rgba(30, 64, 175, 0.06),
+                0 0 0 1px rgba(255, 255, 255, 0.8),
+                inset 0 2px 0 rgba(255, 255, 255, 0.9) !important;
+            transition: none !important;
+            animation: none !important;
+            top: auto !important;
+            left: auto !important;
+            right: auto !important;
+            bottom: auto !important;
+            margin: inherit !important;
+            padding: inherit !important;
+        }
+        
+        /* Override Bootstrap card hover effects completely */
+        .card,
+        .card:hover,
+        .card.shadow-sm,
+        .card.shadow-sm:hover,
+        .card:focus,
+        .card:active,
+        .card.shadow-sm:focus,
+        .card.shadow-sm:active {
+            transform: none !important;
+            translate: none !important;
+            scale: none !important;
+            transition: none !important;
+            animation: none !important;
+            -webkit-transform: none !important;
+            -moz-transform: none !important;
+            -ms-transform: none !important;
+            -o-transform: none !important;
+        }
+        
+        /* Disable all card-related transitions globally */
+        [class*="card"] {
+            transition: none !important;
+            animation: none !important;
+        }
+        
+        [class*="card"]:hover {
+            transform: none !important;
+            transition: none !important;
+            animation: none !important;
+        }
+
+        /* Medical status indicator bar */
+        .card.shadow-sm::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, 
+                var(--hospital-green) 0%, 
+                var(--hospital-teal) 33%, 
+                var(--hospital-blue) 66%, 
+                var(--medical-mint) 100%);
+            background-size: 300% 100%;
+            background-position: 0% 0% !important;
+            animation: none !important;
+            border-radius: 32px 32px 0 0;
+        }
+
+        /* Hospital lighting effect */
+        .card.shadow-sm::after {
+            content: '';
+            position: absolute;
+            top: -20%;
+            left: -20%;
+            right: -20%;
+            height: 40%;
+            background: 
+                radial-gradient(ellipse at 50% 0%, rgba(255,255,255,0.3) 0%, transparent 70%);
+            pointer-events: none;
+            z-index: 1;
+        }
+
+
+        .card-body.p-4.p-md-5 {
+            padding: 0 !important;
+            position: relative;
+            z-index: 2;
+            transform: none !important;
+            animation: none !important;
+            transition: none !important;
+        }
+
+        /* Enhanced hospital layout */
+        .auth-layout {
+            display: flex;
+            align-items: stretch;
+            min-height: 500px;
+            transform: none !important;
+            animation: none !important;
+            transition: none !important;
+        }
+
+        .auth-visual {
+            width: 45%;
+            background: 
+                linear-gradient(160deg, 
+                    rgba(30,64,175,0.08) 0%, 
+                    rgba(16,185,129,0.08) 50%,
+                    rgba(8,145,178,0.08) 100%),
+                linear-gradient(135deg, 
+                    rgba(255,255,255,0.9) 0%, 
+                    rgba(248,250,252,0.95) 100%);
+            border-right: 2px solid rgba(30,64,175,0.12);
+            padding: 2.5rem 2rem;
+            position: relative;
+            overflow: hidden;
+            backdrop-filter: blur(15px);
+            color: var(--deep-navy);
+            transform: none !important;
+            transition: none !important;
+            animation: none !important;
+        }
+        
+        .auth-visual:hover,
+        .auth-visual *:hover {
+            transform: none !important;
+            transition: none !important;
+            animation: none !important;
+        }
+
+        /* Medical equipment grid pattern */
+        .auth-visual::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background:
+                /* Hospital tile pattern */
+                repeating-linear-gradient(0deg, transparent 0 30px, rgba(30,64,175,0.04) 30px 32px),
+                repeating-linear-gradient(90deg, transparent 0 30px, rgba(30,64,175,0.04) 30px 32px),
+                /* Medical cross subtle pattern */
+                repeating-conic-gradient(from 0deg at 50% 50%, 
+                    transparent 0deg, 
+                    rgba(16,185,129,0.02) 45deg, 
+                    transparent 90deg);
+            background-size: 30px 30px, 30px 30px, 60px 60px;
+            pointer-events: none;
+        }
+
+        .auth-form {
+            flex: 1 1 auto;
+            padding: 2.5rem 2.5rem 2rem;
+            background: rgba(255, 255, 255, 0.6);
+            transform: none !important;
+            animation: none !important;
+            transition: none !important;
+        }
+        
+        .auth-form:hover,
+        .auth-form *:hover {
+            transform: none !important;
+            transition: none !important;
+            animation: none !important;
+        }
+        
+        .brand-lockup,
+        .brand-lockup *,
+        .brand-lockup:hover,
+        .brand-lockup:hover * {
+            transform: none !important;
+            transition: none !important;
+            animation: none !important;
+        }
+        
+        .badge-chip,
+        .badge-chip:hover,
+        .visual-badges,
+        .visual-badges:hover {
+            transform: none !important;
+            transition: none !important;
+            animation: none !important;
+        }
+
+        .brand-lockup {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .brand-icon {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 56px; height: 56px;
+            border-radius: 16px;
+            background: 
+                radial-gradient(circle at 30% 30%, var(--medical-mint), var(--hospital-green));
+            box-shadow: 
+                0 12px 24px rgba(16,185,129,0.25), 
+                0 6px 12px rgba(5,150,105,0.15),
+                inset 0 2px 0 rgba(255,255,255,0.4);
+            color: white;
+            font-size: 1.6rem;
+            margin-bottom: 1rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .brand-icon::before {
+            display: none !important;
+        }
+
+        .auth-visual h3 {
+            color: var(--hospital-blue);
+            font-weight: 800;
+            font-size: 1.4rem;
+            letter-spacing: 0.5px;
+            margin: 0;
+            text-shadow: 0 2px 4px rgba(30,64,175,0.1);
+        }
+
+        .auth-visual p.subtle {
+            color: var(--medical-gray);
+            margin: 0.5rem 0 0;
+            font-weight: 600;
+            font-size: 0.95rem;
+        }
+
+        /* Enhanced ECG visualization */
+        .visual-ecg { 
+            position: relative; 
+            margin: 2rem -1rem 1.5rem;
+            padding: 1rem;
+            background: rgba(15, 23, 42, 0.03);
+            border-radius: 12px;
+            border: 1px solid rgba(30,64,175,0.08);
+        }
+
+        .ecg-svg { 
+            width: 100%; 
+            height: 100px; 
+            display: block; 
+        }
+
+        .ecg-path { 
+            fill: none; 
+            stroke: var(--medical-mint); 
+            stroke-width: 2.5; 
+            filter: drop-shadow(0 0 8px rgba(16,185,129,0.4)); 
+            stroke-linejoin: round; 
+            stroke-linecap: round; 
+            stroke-dasharray: none !important; 
+            stroke-dashoffset: 0 !important; 
+            animation: none !important;
+            opacity: 1 !important;
+        }
+
+        .visual-badges { 
+            display: flex; 
+            flex-wrap: wrap; 
+            gap: 0.75rem; 
+            margin-top: 1rem;
+        }
+
+        .badge-chip {
+            background: linear-gradient(135deg, rgba(30,64,175,0.08) 0%, rgba(16,185,129,0.08) 100%);
+            border: 1px solid rgba(30,64,175,0.15);
+            padding: 0.5rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 700;
+            backdrop-filter: blur(10px);
+            color: var(--hospital-blue);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .badge-chip::before {
+            display: none !important;
+        }
+
+        .badge-chip:hover::before {
+            display: none !important;
+        }
+
+        /* Enhanced title styling */
+        h2.text-center.mb-4 {
+            background: linear-gradient(135deg, var(--hospital-blue) 0%, var(--hospital-teal) 50%, var(--medical-mint) 100%);
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-weight: 800 !important;
+            font-size: 2.4rem !important;
+            margin-bottom: 3rem !important;
+            position: relative;
+            text-shadow: 0 0 30px rgba(30,64,175,0.3);
+            animation: none !important;
+            filter: drop-shadow(0 0 18px rgba(30,64,175,0.3)) !important;
+        }
+
+        /* Medical cross with heartbeat - DISABLED */
+        h2.text-center.mb-4::before {
+            content: '⚕';
+            display: block;
+            font-size: 3.5rem;
+            margin-bottom: 1rem;
+            color: var(--medical-mint);
+            filter: drop-shadow(0 0 16px rgba(16,185,129,0.4));
+            animation: none !important;
+            transform: none !important;
+        }
+
+        /* Status bar under title - DISABLED */
+        h2.text-center.mb-4::after {
+            content: '';
+            position: absolute;
+            bottom: -20px;
+            left: 50%;
+            transform: translateX(-50%) !important;
+            width: 130px !important;
+            height: 3px;
+            background: linear-gradient(90deg, var(--hospital-blue), var(--medical-mint), var(--hospital-teal));
+            border-radius: 2px;
+            box-shadow: 0 0 16px rgba(16,185,129,0.4);
+            animation: none !important;
+            opacity: 0.9 !important;
+        }
+
+        /* Form styling enhancements */
+        .form-label {
+            color: var(--hospital-blue) !important;
+            font-weight: 700 !important;
+            font-size: 1rem !important;
+            margin-bottom: 0.75rem !important;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            position: relative;
+        }
+
+        .form-label::before {
+            content: '●';
+            color: var(--medical-mint);
+            margin-right: 0.5rem;
+            font-size: 0.8rem;
+            animation: none !important;
+            opacity: 1 !important;
+        }
+
+        .form-control {
+            background: rgba(255, 255, 255, 0.9) !important;
+            border: 2px solid rgba(30,64,175,0.15) !important;
+            border-radius: 20px !important;
+            padding: 1.2rem 1.5rem !important;
+            color: var(--deep-navy) !important;
+            font-size: 1rem !important;
+            font-weight: 500;
+            backdrop-filter: blur(15px);
+            transition: none !important;
+            box-shadow: 
+                inset 0 2px 6px rgba(15,23,42,0.08),
+                0 0 0 0 rgba(16,185,129,0);
+            transform: none !important;
+        }
+
+        .form-control::placeholder {
+            color: rgba(100,116,139,0.7) !important;
+        }
+
+        .form-control:focus {
+            background: rgba(255, 255, 255, 1) !important;
+            border: 2px solid var(--medical-mint) !important;
+            box-shadow: 
+                0 0 0 4px rgba(16,185,129,0.15),
+                inset 0 2px 6px rgba(15,23,42,0.05),
+                0 0 24px rgba(16,185,129,0.2) !important;
+            transform: none !important;
+            outline: none !important;
+        }
+
+        .form-control:hover:not(:focus) {
+            border: 2px solid rgba(30,64,175,0.25) !important;
+            background: rgba(255, 255, 255, 0.95) !important;
+            transform: none !important;
+        }
+
+        /* Enhanced button styling */
+        .btn.btn-primary.w-100 {
+            background: linear-gradient(135deg, var(--hospital-blue) 0%, var(--hospital-teal) 35%, var(--medical-mint) 100%) !important;
+            background-size: 100% 100% !important;
+            border: none !important;
+            border-radius: 20px !important;
+            padding: 1.2rem 2rem !important;
+            font-weight: 800 !important;
+            font-size: 1.1rem !important;
+            color: white !important;
+            text-transform: uppercase;
+            letter-spacing: 1.2px;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 
+                0 12px 28px rgba(30, 64, 175, 0.3),
+                0 6px 14px rgba(16, 185, 129, 0.2),
+                inset 0 1px 0 rgba(255, 255, 255, 0.3) !important;
+            transition: none !important;
+            animation: none !important;
+            transform: none !important;
+        }
+
+        /* Scan line effect - removed */
+        .btn.btn-primary.w-100::before {
+            display: none !important;
+        }
+
+        .btn.btn-primary.w-100:hover {
+            transform: none !important;
+            box-shadow: 
+                0 12px 28px rgba(30, 64, 175, 0.3),
+                0 6px 14px rgba(16, 185, 129, 0.2),
+                inset 0 1px 0 rgba(255, 255, 255, 0.3) !important;
+            animation: none !important;
+        }
+
+        .btn.btn-primary.w-100:hover::before {
+            display: none !important;
+        }
+
+        .btn.btn-primary.w-100:active {
+            transform: none !important;
+        }
+
+        /* Enhanced alert styling */
+        .alert {
+            background: rgba(255, 255, 255, 0.95) !important;
+            backdrop-filter: blur(15px) !important;
+            border: 1px solid rgba(30,64,175,0.2) !important;
+            border-radius: 20px !important;
+            padding: 1.5rem !important;
+            margin-bottom: 2rem !important;
+            font-weight: 600 !important;
+            color: var(--deep-navy) !important;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 8px 16px rgba(15,23,42,0.1);
+        }
+
+        .alert::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 5px;
+            border-radius: 0 5px 5px 0;
+        }
+
+        .alert-danger::before {
+            background: linear-gradient(180deg, var(--accent-red), #b91c1c);
+            box-shadow: 0 0 20px rgba(220,38,38,0.4);
+        }
+
+        .alert-success::before {
+            background: linear-gradient(180deg, var(--medical-mint), var(--hospital-green));
+            box-shadow: 0 0 20px rgba(16,185,129,0.4);
+        }
+
+        .alert-warning::before {
+            background: linear-gradient(180deg, #f59e0b, #d97706);
+            box-shadow: 0 0 20px rgba(245,158,11,0.4);
+        }
+
+        .alert-info::before {
+            background: linear-gradient(180deg, var(--hospital-teal), var(--hospital-blue));
+            box-shadow: 0 0 20px rgba(8,145,178,0.4);
+        }
+
+        /* Enhanced link styling */
+        .text-center.mt-4 {
+            margin-top: 2.5rem !important;
+        }
+
+        .text-center.mt-4 p {
+            color: var(--medical-gray) !important;
+            font-size: 1rem !important;
+            font-weight: 600;
+        }
+
+        .text-center.mt-4 a {
+            color: var(--hospital-blue) !important;
+            text-decoration: none !important;
+            font-weight: 800 !important;
+            position: relative;
+            padding: 0.6rem 1.2rem;
+            border-radius: 12px;
+            background: linear-gradient(135deg, rgba(30,64,175,0.08) 0%, rgba(16,185,129,0.08) 100%);
+            transition: none !important;
+            display: inline-block;
+            margin-left: 0.5rem;
+            backdrop-filter: blur(15px);
+            border: 1px solid rgba(30,64,175,0.15);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            transform: none !important;
+        }
+
+        .text-center.mt-4 a:hover {
+            transform: none !important;
+            box-shadow: 0 4px 12px rgba(30,64,175,0.15);
+            background: linear-gradient(135deg, rgba(30,64,175,0.12) 0%, rgba(16,185,129,0.12) 100%);
+            border-color: rgba(16,185,129,0.25);
+        }
+
+        .mb-3 {
+            margin-bottom: 2.5rem !important;
+        }
+
+        /* Responsive design */
+        @media (max-width: 768px) {
+            .auth-layout {
+                flex-direction: column;
+            }
+            
+            .auth-visual {
+                width: 100%;
+                border-right: none;
+                border-bottom: 2px solid rgba(30,64,175,0.12);
+                padding: 2rem;
+            }
+            
+            .auth-form {
+                padding: 2rem;
+            }
+            
+            h2.text-center.mb-4 {
+                font-size: 2rem !important;
+            }
+            
+            h2.text-center.mb-4::before {
+                font-size: 2.8rem;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .auth-form {
+                padding: 1.5rem;
+            }
+            
+            h2.text-center.mb-4 {
+                font-size: 1.8rem !important;
+            }
+            
+            .btn.btn-primary.w-100 {
+                padding: 1rem !important;
+                font-size: 1rem !important;
+            }
+        }
+
+        /* Loading state enhancement */
+        .btn.btn-primary.w-100:disabled {
+            position: relative;
+            color: transparent !important;
+            cursor: not-allowed;
+            animation: none;
+            opacity: 0.8;
+        }
+
+        .btn.btn-primary.w-100:disabled::after {
+            content: '';
+            position: absolute;
+            width: 28px;
+            height: 28px;
+            top: 50%;
+            left: 50%;
+            margin-left: -14px;
+            margin-top: -14px;
+            border: 3px solid rgba(255,255,255,0.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: medicalSpin 1s linear infinite;
+        }
+
+        @keyframes medicalSpin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Easter egg enhancement */
+        .easter-egg {
+            animation: medicalRainbow 1s linear infinite;
+        }
+
+        @keyframes medicalRainbow {
+            0% { filter: hue-rotate(0deg) saturate(1.5) brightness(1.2); }
+            100% { filter: hue-rotate(360deg) saturate(1.5) brightness(1.2); }
+        }
+
+        /* Additional medical touches */
+        .form-control:valid {
+            border-color: var(--medical-mint) !important;
+            box-shadow: inset 0 2px 6px rgba(15,23,42,0.05), 0 0 0 2px rgba(16,185,129,0.1) !important;
+        }
+
+        .form-control:invalid:not(:focus):not(:placeholder-shown) {
+            border-color: var(--accent-red) !important;
+            box-shadow: inset 0 2px 6px rgba(15,23,42,0.05), 0 0 0 2px rgba(220,38,38,0.1) !important;
+        }
+        
+        /* FINAL ULTIMATE OVERRIDE - Highest specificity */
+        .card.shadow-sm {
+            transform: none !important;
+            translate: none !important;
+            scale: none !important;
+            transition: none !important;
+            animation: none !important;
+        }
+        .card.shadow-sm:hover,
+        .card.shadow-sm:focus,
+        .card.shadow-sm:active {
+            transform: none !important;
+            translate: none !important;
+            scale: none !important;
+        }
+    </style>
+    <style>
+        /* Additional layer of protection */
+        .card.shadow-sm,
+        .card.shadow-sm:hover {
+            transform: none !important;
+            transition: none !important;
+            animation: none !important;
+        }
+    </style>
+</head>
+<body class="bg-light">
+
+    <main class="container">
+        <div class="row justify-content-center align-items-center" style="min-height: 100vh; margin: 0;">
+            <div class="col-md-8 col-lg-7 col-xl-6" style="padding: 0 15px;">
+                <div class="card shadow-sm" style="transform: none !important; transition: none !important; animation: none !important; will-change: auto !important; position: static !important;">
+                    <div class="card-body p-4 p-md-5">
+                        <div class="auth-layout">
+                            <div class="auth-visual d-none d-lg-flex flex-column justify-content-between">
+                                <div class="brand-lockup">
+                                    <span class="brand-icon">⚕</span>
+                                    <h3>MediMatrix Hospital</h3>
+                                    <p class="subtle">Advanced Care • Trusted Excellence</p>
+                                </div>
+                                <div class="visual-ecg">
+                                    <svg viewBox="0 0 600 100" preserveAspectRatio="none" class="ecg-svg" aria-hidden="true">
+                                        <path class="ecg-path" d="M0 50 L50 50 L60 20 L70 80 L80 50 L130 50 L140 25 L150 75 L160 50 L210 50 L220 15 L230 85 L240 50 L290 50 L300 30 L310 70 L320 50 L370 50 L380 20 L390 80 L400 50 L450 50 L460 25 L470 75 L480 50 L530 50 L540 15 L550 85 L560 50 L600 50" />
+                                    </svg>
+                                </div>
+                                <div class="visual-badges">
+                                    <span class="badge-chip">🏥 24/7 Emergency</span>
+                                    <span class="badge-chip">🔒 Secure Portal</span>
+                                    <span class="badge-chip">📊 HIPAA Compliant</span>
+                                    <span class="badge-chip">🩺 Patient Care</span>
+                                </div>
+                            </div>
+                            <div class="auth-form">
+                                <h2 class="text-center mb-4" ondblclick="this.classList.toggle('easter-egg')">MediMatrix Portal</h2>
+                                {% with messages = get_flashed_messages(with_categories=true) %}
+                                    {% if messages %}
+                                        {% for category, message in messages %}
+                                            <div class="alert alert-{{ category }} alert-dismissible fade show auto-dismiss" role="alert" data-auto-dismiss="5000">
+                                                {{ message }}
+                                                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                                            </div>
+                                        {% endfor %}
+                                    {% endif %}
+                                {% endwith %}
+                                <form method="POST" action="{{ url_for('auth.login') }}">
+                                    <div class="mb-3">
+                                        <label for="username" class="form-label">Medical ID / Username</label>
+                                        <input type="text" class="form-control" id="username" name="username" placeholder="Enter your medical ID or username" required>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="password" class="form-label">Secure Password</label>
+                                        <input type="password" class="form-control" id="password" name="password" placeholder="Enter your secure password" required>
+                                    </div>
+                                    <button type="submit" class="btn btn-primary w-100">🔐 Secure Access</button>
+                                </form>
+                                <div class="text-center mt-4">
+                                    <p class="mb-0">Need Access? <a href="{{ url_for('auth.register') }}">📝 Register Here</a></p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- FORCE CARD STABILITY WITH JAVASCRIPT -->
+    <script>
+        (function() {
+            // Force card to stay completely still
+            function forceCardStability() {
+                const card = document.querySelector('.card.shadow-sm');
+                if (card) {
+                    // Remove all transitions and transforms
+                    card.style.transform = 'none';
+                    card.style.transition = 'none';
+                    card.style.animation = 'none';
+                    card.style.willChange = 'auto';
+                    
+                    // Override on hover
+                    card.addEventListener('mouseenter', function(e) {
+                        e.target.style.transform = 'none';
+                        e.target.style.transition = 'none';
+                    }, true);
+                    
+                    card.addEventListener('mouseleave', function(e) {
+                        e.target.style.transform = 'none';
+                        e.target.style.transition = 'none';
+                    }, true);
+                    
+                    // Use MutationObserver to prevent any style changes
+                    const observer = new MutationObserver(function(mutations) {
+                        mutations.forEach(function(mutation) {
+                            if (mutation.type === 'attributes' && mutation.attributeName === 'style') {
+                                card.style.transform = 'none';
+                                card.style.transition = 'none';
+                                card.style.animation = 'none';
+                            }
+                        });
+                    });
+                    
+                    observer.observe(card, {
+                        attributes: true,
+                        attributeFilter: ['style', 'class']
+                    });
+                }
+            }
+            
+            // Run immediately and on DOM ready
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', forceCardStability);
+            } else {
+                forceCardStability();
+            }
+            
+            // Also run after a short delay to override any late-loading styles
+            setTimeout(forceCardStability, 100);
+            setTimeout(forceCardStability, 500);
+            
+            // Auto-dismiss flash messages
+            document.querySelectorAll('.auto-dismiss').forEach(function(alert) {
+                const dismissTime = parseInt(alert.getAttribute('data-auto-dismiss')) || 5000;
+                setTimeout(function() {
+                    const bsAlert = new bootstrap.Alert(alert);
+                    bsAlert.close();
+                }, dismissTime);
+            });
+            
+            // Prevent any element from moving on mouse move
+            document.addEventListener('mousemove', function(e) {
+                // Force all elements to stay in place
+                document.querySelectorAll('*').forEach(function(el) {
+                    if (el.style.transform && el.style.transform !== 'none') {
+                        el.style.transform = 'none';
+                    }
+                });
+            });
+            
+            // Specifically lock auth-visual and auth-form sections
+            function lockAuthSections() {
+                const authVisual = document.querySelector('.auth-visual');
+                const authForm = document.querySelector('.auth-form');
+                const brandLockup = document.querySelector('.brand-lockup');
+                const registerLink = document.querySelector('.text-center.mt-4 a');
+                
+                [authVisual, authForm, brandLockup, registerLink].forEach(function(el) {
+                    if (el) {
+                        el.style.transform = 'none';
+                        el.style.transition = 'none';
+                        el.style.animation = 'none';
+                        el.style.position = 'relative';
+                    }
+                });
+            }
+            
+            // Lock sections immediately and on various events
+            lockAuthSections();
+            document.addEventListener('DOMContentLoaded', lockAuthSections);
+            window.addEventListener('load', lockAuthSections);
+            document.addEventListener('mousemove', lockAuthSections);
+            document.addEventListener('mouseenter', lockAuthSections);
+            document.addEventListener('mouseleave', lockAuthSections);
+        })();
+    </script>
+</body>
+</html>

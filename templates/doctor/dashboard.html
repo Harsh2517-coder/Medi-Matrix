@@ -1,0 +1,163 @@
+{% extends "base.html" %}
+{% block content %}
+
+<style>
+    /* --- Page Header Styling --- */
+    .page-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 1rem;
+        margin-bottom: 2rem;
+        padding-bottom: 1rem;
+        border-bottom: 1px solid rgba(30, 64, 175, 0.1);
+        animation: fadeIn 0.5s ease-out forwards;
+        opacity: 0;
+    }
+
+    .page-title {
+        font-weight: 800;
+        font-size: 2.5rem;
+        background: linear-gradient(135deg, var(--hospital-blue) 20%, var(--hospital-teal) 100%);
+        background-clip: text;
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+    
+    /* Button styles are now standardized in base.html */
+    
+    .dashboard-header-content {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+    }
+
+    /* --- Appointment Cards Layout --- */
+    .appointments-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+        gap: 1.5rem;
+    }
+
+    .appointment-card {
+        background: rgba(255, 255, 255, 0.8) !important;
+        backdrop-filter: blur(20px) saturate(180%);
+        border: 1px solid rgba(255, 255, 255, 0.5);
+        border-radius: 1.5rem;
+        box-shadow: 0 15px 30px rgba(30, 64, 175, 0.08);
+        transition: transform 0.4s ease, box-shadow 0.4s ease;
+        opacity: 0;
+        transform: translateY(20px);
+        animation: slideInUp 0.6s ease-out forwards;
+        animation-delay: calc(var(--animation-order, 0) * 100ms);
+        display: flex;
+        flex-direction: column;
+    }
+
+    @keyframes slideInUp {
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    .appointment-card:hover {
+        transform: translateY(-8px);
+        box-shadow: 0 25px 50px rgba(30, 64, 175, 0.15);
+    }
+
+    .card-header {
+        padding: 1.5rem;
+        border-bottom: 1px solid rgba(226, 232, 240, 1);
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+    }
+    .patient-info {
+        font-size: 1.25rem;
+        font-weight: 700;
+        color: var(--deep-navy);
+    }
+    .appointment-status {
+        padding: 0.4rem 1rem;
+        font-weight: 600;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+    
+    /* Dynamic Status Badge Colors */
+    .status-confirmed { background-color: rgba(30,64,175,.1); color: var(--hospital-blue); box-shadow: 0 0 15px rgba(30,64,175,.2); }
+    .status-completed { background-color: rgba(5,150,105,.1); color: var(--hospital-green); box-shadow: 0 0 15px rgba(5,150,105,.2); }
+    .status-cancelled { background-color: rgba(153,27,27,.1); color: #991b1b; box-shadow: 0 0 15px rgba(153,27,27,.2); }
+    .status-no-show { background-color: rgba(245,158,11,.1); color: #b45309; box-shadow: 0 0 15px rgba(245,158,11,.2); }
+    .status-pending { background-color: rgba(100,116,139,.1); color: var(--medical-gray); box-shadow: 0 0 15px rgba(100,116,139,.2); }
+
+    .card-body {
+        padding: 1.5rem;
+        flex-grow: 1;
+        display: flex;
+        flex-direction: column;
+    }
+    .detail-item { margin-bottom: 1rem; }
+    .detail-item strong {
+        display: block;
+        font-size: 0.8rem;
+        font-weight: 600;
+        color: var(--medical-gray);
+        text-transform: uppercase;
+        margin-bottom: 0.25rem;
+    }
+    .detail-item span {
+        font-size: 1rem;
+        font-weight: 500;
+        color: var(--deep-navy);
+    }
+
+    .no-appointments-card {
+        grid-column: 1 / -1; /* Span full width if it's the only item */
+        text-align: center;
+        padding: 4rem;
+    }
+
+    @keyframes fadeIn { to { opacity: 1; } }
+</style>
+
+<div class="page-header">
+    <div class="dashboard-header-content">
+        <h2 class="page-title">Doctor's Dashboard 🩺</h2>
+    </div>
+    <div class="header-actions">
+        <a href="{{ url_for('doctor.patient_list') }}" class="btn btn-info">My Patients</a>
+        <a href="{{ url_for('doctor.salary_history') }}" class="btn btn-secondary">Salary History</a>
+    </div>
+</div>
+
+<h4>My Appointments</h4>
+
+<div class="appointments-grid">
+    {% for app in appointments %}
+    <div class="appointment-card" style="--animation-order: {{ loop.index }};">
+        <div class="card-header">
+            <span class="patient-info">{{ app.FirstName }} {{ app.LastName }}</span>
+            <span class="appointment-status status-{{ app.Status | lower | replace(' ', '-') }}">
+                {{ app.Status }}
+            </span>
+        </div>
+        <div class="card-body">
+            <div class="detail-item">
+                <strong>Date & Time</strong>
+                <span>{{ app.AppointmentDateTime.strftime('%d %b %Y, %I:%M %p') }}</span>
+            </div>
+            <div class="detail-item">
+                <strong>Reason for Visit</strong>
+                <span>{{ app.Reason }}</span>
+            </div>
+        </div>
+    </div>
+    {% else %}
+    <div class="appointment-card no-appointments-card">
+        <h4 class="text-muted">You have no appointments scheduled.</h4>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}

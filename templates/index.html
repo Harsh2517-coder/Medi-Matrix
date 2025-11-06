@@ -1,0 +1,255 @@
+{% extends "base.html" %}
+{% block content %}
+
+<style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+
+    /* --- Medical Color Palette --- */
+    :root {
+        --hospital-blue: #1e40af;
+        --hospital-green: #059669;
+        --hospital-teal: #0891b2;
+        --medical-mint: #10b981;
+        --deep-navy: #0f172a;
+        --grid-medical: rgba(30, 64, 175, 0.08);
+        --glow-color: rgba(16, 185, 129, 0.7);
+    }
+
+    /* --- DEEPER Animated Body Background --- */
+    body {
+        font-family: 'Inter', sans-serif !important;
+        background: #f8fafc !important;
+        position: relative;
+        overflow: hidden; /* Prevent scrollbars from animations */
+    }
+
+    .background-container {
+        position: fixed; top: 0; left: 0;
+        width: 100%; height: 100%;
+        z-index: 1;
+        background: linear-gradient(135deg, #f0f4f8 0%, #e2e8f0 100%);
+    }
+
+    .background-container::before, .background-container::after {
+        content: '';
+        position: absolute; top: 0; left: 0;
+        width: 100%; height: 100%;
+        pointer-events: none;
+    }
+
+    /* Layer 1: Animated Grid */
+    .background-container::before {
+        background:
+            repeating-linear-gradient(0deg, var(--grid-medical) 0 1px, transparent 1px 45px),
+            repeating-linear-gradient(90deg, var(--grid-medical) 0 1px, transparent 1px 45px);
+        animation: panGrid 40s linear infinite;
+    }
+    @keyframes panGrid {
+        0% { background-position: 0 0; }
+        100% { background-position: 90px 90px; }
+    }
+    
+    /* Layer 2: Animated Radar Sweep & Glows */
+    .background-container::after {
+        background:
+            radial-gradient(circle at 15% 25%, rgba(16,185,129,0.12), transparent 30%),
+            radial-gradient(circle at 85% 75%, rgba(30,64,175,0.12), transparent 30%),
+            repeating-conic-gradient(from 0deg, transparent 0% 25%, rgba(16,185,129,0.05) 50%, transparent 50% 100%);
+        background-size: 800px 800px, 600px 600px, 100% 100%;
+        animation: backgroundFlow 20s ease-in-out infinite, radarSweep 15s linear infinite;
+    }
+
+    @keyframes backgroundFlow {
+        0%, 100% { background-position: 0% 0%, 100% 100%, 0 0; }
+        50% { background-position: 25% 25%, 75% 75%, 0 0; }
+    }
+    @keyframes radarSweep {
+        from { transform: rotate(0deg); } to { transform: rotate(360deg); }
+    }
+
+    /* --- Main Container & Card (with "Boot-Up" Animation) --- */
+    .main-container {
+        position: relative; z-index: 2;
+        display: flex; align-items: center; justify-content: center;
+        min-height: 100vh; padding: 2rem;
+    }
+
+    .card {
+        background: rgba(255, 255, 255, 0.8) !important;
+        backdrop-filter: blur(25px) saturate(180%) !important;
+        border: 1px solid rgba(255, 255, 255, 0.5) !important;
+        border-radius: 2rem !important;
+        box-shadow: 0 40px 80px rgba(15, 23, 42, 0.2) !important;
+        max-width: 1100px; width: 100%;
+        overflow: hidden;
+        animation: cardLoadIn 0.8s ease-out forwards;
+        opacity: 0;
+        transform: scale(0.95);
+    }
+    .card-body { padding: 0 !important; }
+    
+    @keyframes cardLoadIn {
+        to { opacity: 1; transform: scale(1); }
+    }
+
+    /* --- Split Screen Layout --- */
+    .auth-layout { display: flex; }
+    .auth-visual {
+        width: 45%; padding: 2.5rem;
+        background: rgba(248, 250, 252, 0.7);
+        border-right: 1px solid rgba(226, 232, 240, 0.8);
+        display: flex; flex-direction: column; justify-content: center; align-items: center;
+        text-align: center;
+    }
+    .auth-content { flex-grow: 1; padding: 3rem; }
+
+    /* --- "CRAZY" 3D WIREFRAME HEART --- */
+    .heart-visual {
+        width: 200px; height: 200px;
+        perspective: 1000px;
+        margin-bottom: 2rem;
+    }
+    .heart-3d {
+        width: 100%; height: 100%;
+        position: relative;
+        transform-style: preserve-3d;
+        animation: rotateHeart 20s linear infinite;
+    }
+    @keyframes rotateHeart {
+        from { transform: rotateY(0deg) rotateX(10deg); }
+        to { transform: rotateY(360deg) rotateX(10deg); }
+    }
+    .heart-slice {
+        position: absolute;
+        top: 0; left: 0; width: 100%; height: 100%;
+        border-radius: 50%;
+        border: 2px solid var(--medical-mint);
+        box-shadow: 0 0 20px var(--glow-color), inset 0 0 20px var(--glow-color);
+        animation: pulseGlow 2s ease-in-out infinite;
+    }
+    @keyframes pulseGlow {
+        0%, 100% { opacity: 0.7; transform: scale(0.95); }
+        50% { opacity: 1; transform: scale(1); }
+    }
+    /* Constructing the heart shape */
+    .heart-slice:nth-child(1) { transform: rotateY(0deg) scale(0.2); }
+    .heart-slice:nth-child(2) { transform: rotateY(18deg) scale(0.4); }
+    .heart-slice:nth-child(3) { transform: rotateY(36deg) scale(0.6); }
+    .heart-slice:nth-child(4) { transform: rotateY(54deg) scale(0.8); }
+    .heart-slice:nth-child(5) { transform: rotateY(72deg) scale(0.95); }
+    .heart-slice:nth-child(6) { transform: rotateY(90deg) scale(1); } /* Widest part */
+    .heart-slice:nth-child(7) { transform: rotateY(108deg) scale(0.95); }
+    .heart-slice:nth-child(8) { transform: rotateY(126deg) scale(0.8); }
+    .heart-slice:nth-child(9) { transform: rotateY(144deg) scale(0.6); }
+    .heart-slice:nth-child(10){ transform: rotateY(162deg) scale(0.4); }
+    .heart-slice:nth-child(11){ transform: rotateY(180deg) scale(0.2); }
+    
+    .auth-visual h3 { color: var(--hospital-blue); font-weight: 700; z-index: 3; }
+    .auth-visual .subtle { color: var(--medical-gray); font-weight: 500; z-index: 3; }
+    
+    /* --- Right Content Panel with "Decode" Animation --- */
+    .welcome-title {
+        font-weight: 800 !important; font-size: 2.8rem;
+        background: linear-gradient(135deg, var(--hospital-blue) 20%, var(--hospital-teal) 100%);
+        background-clip: text; -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+        animation: fadeIn 1s ease-out 0.5s forwards;
+        opacity: 0;
+    }
+    .welcome-subtitle {
+        font-size: 1.1rem; max-width: 90%;
+        animation: fadeIn 1s ease-out 0.8s forwards;
+        opacity: 0;
+    }
+    .feature-blocks {
+        animation: fadeIn 1s ease-out 1.1s forwards;
+        opacity: 0;
+    }
+    .welcome-cta-container {
+        animation: fadeIn 1s ease-out 1.4s forwards;
+        opacity: 0;
+    }
+    @keyframes fadeIn { to { opacity: 1; } }
+
+    .feature-block {
+        background: rgba(240, 249, 245, 0.7);
+        padding: 1.5rem; border-radius: 1rem;
+        border: 1px solid #e2e8f0;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    .feature-block:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 15px 30px rgba(30, 64, 175, 0.1);
+    }
+    .feature-block h4 { font-size: 1.2rem; font-weight: 700; color: var(--deep-navy); }
+    
+    .welcome-cta {
+        background: linear-gradient(135deg, var(--hospital-blue), var(--hospital-teal)) !important;
+        border: none !important; border-radius: 0.75rem !important;
+        padding: 1rem 2rem !important; font-weight: 700 !important;
+        color: white !important;
+        box-shadow: 0 10px 25px rgba(30, 64, 175, 0.25);
+        animation: buttonPulse 2.5s ease-in-out infinite;
+        transition: all 0.3s ease !important;
+    }
+    @keyframes buttonPulse {
+        0%, 100% { transform: scale(1); box-shadow: 0 10px 25px rgba(30, 64, 175, 0.25); }
+        50% { transform: scale(1.05); box-shadow: 0 15px 30px rgba(16,185,129,0.3); }
+    }
+    .welcome-cta:hover { animation-play-state: paused; }
+
+    /* --- Responsive --- */
+    @media (max-width: 992px) {
+        .auth-layout { flex-direction: column; }
+        .auth-visual { width: 100%; border-right: none; border-bottom: 1px solid #e2e8f0; }
+    }
+</style>
+
+<div class="background-container"></div>
+<div class="main-container">
+    <div class="card">
+        <div class="card-body">
+            <div class="auth-layout">
+                <div class="auth-visual d-none d-lg-flex">
+                    <div class="heart-visual">
+                        <div class="heart-3d">
+                            <div class="heart-slice"></div><div class="heart-slice"></div>
+                            <div class="heart-slice"></div><div class="heart-slice"></div>
+                            <div class="heart-slice"></div><div class="heart-slice"></div>
+                            <div class="heart-slice"></div><div class="heart-slice"></div>
+                            <div class="heart-slice"></div><div class="heart-slice"></div>
+                            <div class="heart-slice"></div>
+                        </div>
+                    </div>
+                    <h3>Advanced Care Technology</h3>
+                    <p class="subtle">Intelligent systems powering a healthier future.</p>
+                </div>
+
+                <div class="auth-content">
+                    <h1 class="welcome-title">Welcome to MediMatrix</h1>
+                    <p class="welcome-subtitle">Your central hub for seamless patient care, scheduling, and hospital administration.</p>
+                    <hr class="my-4">
+
+                    <div class="feature-blocks row">
+                        <div class="col-md-6 mb-3 mb-md-0">
+                            <div class="feature-block h-100">
+                                <h4>🧑‍⚕️ For Patients</h4>
+                                <p>Access medical history, book appointments, and manage your health journey.</p>
+                            </div>
+                        </div>
+                         <div class="col-md-6">
+                            <div class="feature-block h-100">
+                                <h4>🩺 For Doctors & Staff</h4>
+                                <p>Streamline workflows with intuitive dashboards and secure patient data access.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mt-4 pt-3 text-center welcome-cta-container">
+                         <a class="btn welcome-cta" href="{{ url_for('auth.login') }}" role="button">Access Your Portal</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

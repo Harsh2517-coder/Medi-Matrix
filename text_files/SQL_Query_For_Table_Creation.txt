@@ -1,0 +1,189 @@
+-- =====================================================================
+-- MediMatrix Complete Database Reset Script (Plain Text Passwords)
+--
+-- This single script will CREATE a new DATABASE,
+-- build all tables, and insert all sample data.
+-- =====================================================================
+
+CREATE DATABASE DBMS_CP;
+
+USE DBMS_CP;
+
+-- Table: Specializations
+CREATE TABLE IF NOT EXISTS Specializations (
+    SpecializationID INT AUTO_INCREMENT PRIMARY KEY,
+    SpecializationName VARCHAR(100) UNIQUE NOT NULL,
+    Description TEXT
+);
+
+-- Table: Users (MODIFIED with plain text `Password` column)
+CREATE TABLE IF NOT EXISTS Users (
+    UserID INT AUTO_INCREMENT PRIMARY KEY,
+    Username VARCHAR(100) UNIQUE NOT NULL,
+    `Password` VARCHAR(255) NOT NULL, -- Storing plain text password
+    Role ENUM('patient', 'doctor', 'admin', 'accountant') NOT NULL,
+    IsActive BOOLEAN DEFAULT TRUE,
+    CreatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Table: Patients
+CREATE TABLE IF NOT EXISTS Patients (
+    PatientID INT AUTO_INCREMENT PRIMARY KEY,
+    UserID INT UNIQUE NOT NULL,
+    FirstName VARCHAR(50) NOT NULL,
+    LastName VARCHAR(50) NOT NULL,
+    DateOfBirth DATE NOT NULL,
+    Gender ENUM('Male', 'Female', 'Other') NOT NULL,
+    ContactNumber VARCHAR(15) UNIQUE NOT NULL,
+    Address TEXT,
+    FOREIGN KEY (UserID) REFERENCES Users(UserID) ON DELETE CASCADE
+);
+
+-- Table: Doctors
+CREATE TABLE IF NOT EXISTS Doctors (
+    DoctorID INT AUTO_INCREMENT PRIMARY KEY,
+    UserID INT UNIQUE NOT NULL,
+    FirstName VARCHAR(50) NOT NULL,
+    LastName VARCHAR(50) NOT NULL,
+    SpecializationID INT,
+    ContactNumber VARCHAR(15) UNIQUE NOT NULL,
+    HireDate DATE NOT NULL,
+    FOREIGN KEY (UserID) REFERENCES Users(UserID) ON DELETE CASCADE,
+    FOREIGN KEY (SpecializationID) REFERENCES Specializations(SpecializationID) ON DELETE SET NULL
+);
+
+-- Table: StaffProfiles
+CREATE TABLE IF NOT EXISTS StaffProfiles (
+    StaffID INT AUTO_INCREMENT PRIMARY KEY,
+    UserID INT UNIQUE NOT NULL,
+    FirstName VARCHAR(50) NOT NULL,
+    LastName VARCHAR(50) NOT NULL,
+    Position VARCHAR(100) NOT NULL,
+    HireDate DATE NOT NULL,
+    FOREIGN KEY (UserID) REFERENCES Users(UserID) ON DELETE CASCADE
+);
+
+-- Table: Appointments
+CREATE TABLE IF NOT EXISTS Appointments (
+    AppointmentID INT AUTO_INCREMENT PRIMARY KEY,
+    PatientID INT NOT NULL,
+    DoctorID INT,
+    AppointmentDateTime DATETIME NOT NULL,
+    Reason TEXT,
+    Status ENUM('Pending', 'Confirmed', 'Completed', 'Cancelled', 'No Show') DEFAULT 'Pending',
+    Diagnosis TEXT,
+    FOREIGN KEY (PatientID) REFERENCES Patients(PatientID) ON DELETE CASCADE,
+    FOREIGN KEY (DoctorID) REFERENCES Doctors(DoctorID) ON DELETE SET NULL
+);
+
+-- Table: Prescriptions
+CREATE TABLE IF NOT EXISTS Prescriptions (
+    PrescriptionID INT AUTO_INCREMENT PRIMARY KEY,
+    AppointmentID INT UNIQUE NOT NULL,
+    PrescriptionDate DATE NOT NULL,
+    Notes TEXT,
+    FOREIGN KEY (AppointmentID) REFERENCES Appointments(AppointmentID) ON DELETE CASCADE
+);
+
+-- Table: Expenses
+CREATE TABLE IF NOT EXISTS Expenses (
+    ExpenseID INT AUTO_INCREMENT PRIMARY KEY,
+    Category VARCHAR(100) NOT NULL,
+    Description TEXT,
+    Amount DECIMAL(10, 2) NOT NULL,
+    ExpenseDate DATE NOT NULL,
+    RecordedByUserID INT,
+    FOREIGN KEY (RecordedByUserID) REFERENCES Users(UserID) ON DELETE SET NULL
+);
+
+-- Table: Salaries
+CREATE TABLE IF NOT EXISTS Salaries (
+    SalaryID INT AUTO_INCREMENT PRIMARY KEY,
+    UserID INT NOT NULL,
+    Amount DECIMAL(10, 2) NOT NULL,
+    PaymentDate DATE NOT NULL,
+    Notes TEXT,
+    FOREIGN KEY (UserID) REFERENCES Users(UserID) ON DELETE CASCADE
+);
+
+-- Table: Invoices
+CREATE TABLE IF NOT EXISTS Invoices (
+    InvoiceID INT AUTO_INCREMENT PRIMARY KEY,
+    AppointmentID INT UNIQUE NOT NULL,
+    TotalAmount DECIMAL(10, 2) NOT NULL,
+    InvoiceDate DATE NOT NULL,
+    DueDate DATE NOT NULL,
+    Status ENUM('Unpaid', 'Paid', 'Overdue') DEFAULT 'Unpaid',
+    FOREIGN KEY (AppointmentID) REFERENCES Appointments(AppointmentID) ON DELETE CASCADE
+);
+
+-- Table: Payments
+CREATE TABLE IF NOT EXISTS Payments (
+    PaymentID INT AUTO_INCREMENT PRIMARY KEY,
+    InvoiceID INT NOT NULL,
+    PaymentDate TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    Amount DECIMAL(10, 2) NOT NULL,
+    PaymentMethod ENUM('Cash', 'Credit Card', 'Bank Transfer', 'Insurance') NOT NULL,
+    FOREIGN KEY (InvoiceID) REFERENCES Invoices(InvoiceID) ON DELETE CASCADE
+);
+
+
+-- =====================================================================
+-- Step 5: Insert All Sample Data
+-- =====================================================================
+
+-- Table: Specializations
+INSERT INTO `Specializations` (`SpecializationID`, `SpecializationName`, `Description`) VALUES
+(1, 'Cardiology', 'Deals with disorders of the heart as well as some parts of the circulatory system.'),
+(2, 'Neurology', 'Branch of medicine dealing with disorders of the nervous system.'),
+(3, 'Orthopedics', 'Branch of surgery concerned with conditions involving the musculoskeletal system.'),
+(4, 'Dermatology', 'The branch of medicine dealing with the skin, nails, hair and its diseases.'),
+(5, 'Pediatrics', 'The branch of medicine that involves the medical care of infants, children, and adolescents.'),
+(6, 'Gastroenterology', 'Deals with the digestive system and its disorders.'),
+(7, 'General Medicine', 'The medical specialty dedicated to the diagnosis and medical treatment of adults.');
+
+-- Table: Users (with plain text passwords)
+INSERT INTO `Users` (`UserID`, `Username`, `Password`, `Role`) VALUES
+(1, 'priya.sharma84', 'password123', 'patient'), (2, 'rohan.verma22', 'password123', 'patient'), (3, 'anika.patel99', 'password123', 'patient'), (4, 'arjun.singh01', 'password123', 'patient'), (5, 'mira.kumar12', 'password123', 'patient'), (6, 'vikram.reddy45', 'password123', 'patient'), (7, 'nisha.gupta33', 'password123', 'patient'), (8, 'aditya.joshi78', 'password123', 'patient'), (9, 'kavita.mishra09', 'password123', 'patient'), (10, 'siddharth.rao56', 'password123', 'patient'), (11, 'sunita.menon23', 'password123', 'patient'), (12, 'rajesh.iyer88', 'password123', 'patient'), (13, 'deepa.nair15', 'password123', 'patient'), (14, 'sanjay.choudhary41', 'password123', 'patient'), (15, 'isha.desai62', 'password123', 'patient'), (16, 'rahul.agarwal77', 'password123', 'patient'), (17, 'pooja.jain91', 'password123', 'patient'), (18, 'amit.bansal30', 'password123', 'patient'), (19, 'neha.thakur25', 'password123', 'patient'), (20, 'varun.mehta50', 'password123', 'patient'),
+(101, 'dr.alok.gupta', 'password123', 'doctor'), (102, 'dr.sunita.rao', 'password123', 'doctor'), (103, 'dr.vikas.patel', 'password123', 'doctor'), (104, 'dr.riya.sharma', 'password123', 'doctor'), (105, 'dr.manish.singh', 'password123', 'doctor'), (106, 'dr.preeti.joshi', 'password123', 'doctor'), (107, 'dr.raj.kumar', 'password123', 'doctor'), (108, 'dr.anjana.verma', 'password123', 'doctor'), (109, 'dr.suresh.reddy', 'password123', 'doctor'), (110, 'dr.leela.nair', 'password123', 'doctor'),
+(121, 'admin.rk.sharma', 'password123', 'admin'), (122, 'admin.sm.desai', 'password123', 'admin'),
+(123, 'acct.vinod.mehra', 'password123', 'accountant'), (124, 'acct.geeta.iyengar', 'password123', 'accountant');
+
+-- Table: Patients
+INSERT INTO `Patients` (`UserID`, `FirstName`, `LastName`, `DateOfBirth`, `Gender`, `ContactNumber`, `Address`) VALUES
+(1, 'Priya', 'Sharma', '1984-05-15', 'Female', '+91 9820012345', '12B, Lokhandwala Complex, Andheri West, Mumbai'), (2, 'Rohan', 'Verma', '1992-11-20', 'Male', '+91 9930123456', 'A-404, Kothrud Gardens, Pune'), (3, 'Anika', 'Patel', '1999-01-30', 'Female', '+91 9867234567', '7, Gulmohar Park, New Delhi'), (4, 'Arjun', 'Singh', '2001-07-22', 'Male', '+91 9821345678', 'Flat 5, Sector 17, Chandigarh'), (5, 'Mira', 'Kumar', '1978-03-12', 'Female', '+91 9892456789', '88, Anna Salai, Chennai'), (6, 'Vikram', 'Reddy', '1985-09-05', 'Male', '+91 9848567890', 'Plot 10, Jubilee Hills, Hyderabad'), (7, 'Nisha', 'Gupta', '1993-06-18', 'Female', '+91 9810678901', 'C-1, Vasant Kunj, New Delhi'), (8, 'Aditya', 'Joshi', '1978-12-25', 'Male', '+91 9823789012', '201, Prabhat Road, Pune'), (9, 'Kavita', 'Mishra', '2000-02-14', 'Female', '+91 9899890123', 'D-5, Gomti Nagar, Lucknow'), (10, 'Siddharth', 'Rao', '1986-08-19', 'Male', '+91 9880901234', '110, Indiranagar, Bangalore'), (11, 'Sunita', 'Menon', '1983-04-21', 'Female', '+91 9845123450', '34, Koramangala, Bangalore'), (12, 'Rajesh', 'Iyer', '1988-10-03', 'Male', '+91 9820234561', '56, Matunga East, Mumbai'), (13, 'Deepa', 'Nair', '1995-07-11', 'Female', '+91 9847345672', '78, Panampilly Nagar, Kochi'), (14, 'Sanjay', 'Choudhary', '1981-05-09', 'Male', '+91 9814456783', '90, Civil Lines, Jaipur'), (15, 'Isha', 'Desai', '1992-09-28', 'Female', '+91 9825567894', '12, C.G. Road, Ahmedabad'), (16, 'Rahul', 'Agarwal', '1977-11-17', 'Male', '+91 9830678905', '34, Park Street, Kolkata'), (17, 'Pooja', 'Jain', '1991-01-01', 'Female', '+91 9818789016', '56, Rohini, New Delhi'), (18, 'Amit', 'Bansal', '1980-03-30', 'Male', '+91 9873890127', '78, Gurgaon Sector 56, Gurgaon'), (19, 'Neha', 'Thakur', '1995-02-25', 'Female', '+91 9816901238', '90, The Mall, Shimla'), (20, 'Varun', 'Mehta', '1990-05-20', 'Male', '+91 9892123459', '12, Juhu Tara Road, Mumbai');
+
+-- Table: Doctors
+INSERT INTO `Doctors` (`UserID`, `FirstName`, `LastName`, `SpecializationID`, `ContactNumber`, `HireDate`) VALUES
+(101, 'Alok', 'Gupta', 1, '+91 9820000001', '2010-05-15'), (102, 'Sunita', 'Rao', 5, '+91 9930111112', '2012-08-20'), (103, 'Vikas', 'Patel', 3, '+91 9867222223', '2015-01-10'), (104, 'Riya', 'Sharma', 4, '+91 9821333334', '2018-06-01'), (105, 'Manish', 'Singh', 7, '+91 9892444445', '2011-03-22'), (106, 'Preeti', 'Joshi', 2, '+91 9848555556', '2019-11-05'), (107, 'Raj', 'Kumar', 6, '+91 9810666667', '2014-09-18'), (108, 'Anjana', 'Verma', 1, '+91 9823777778', '2020-02-25'), (109, 'Suresh', 'Reddy', 3, '+91 9899888889', '2013-07-14'), (110, 'Leela', 'Nair', 5, '+91 9880999990', '2016-10-19');
+
+-- Table: StaffProfiles
+INSERT INTO `StaffProfiles` (`UserID`, `FirstName`, `LastName`, `Position`, `HireDate`) VALUES
+(121, 'Rajesh Kumar', 'Sharma', 'Hospital Administrator', '2008-03-01'), (122, 'Smita', 'Desai', 'Operations Manager', '2015-09-12'), (123, 'Vinod', 'Mehra', 'Senior Accountant', '2012-07-20'), (124, 'Geeta', 'Iyengar', 'Finance Officer', '2018-11-30');
+
+-- Table: Appointments
+INSERT INTO `Appointments` (`PatientID`, `DoctorID`, `AppointmentDateTime`, `Reason`, `Status`, `Diagnosis`) VALUES
+(1, 1, '2025-08-01 10:00:00', 'Chest pain and shortness of breath', 'Completed', 'Stable angina. Advised lifestyle changes and prescribed medication.'), (2, 5, '2025-08-01 11:30:00', 'Annual physical check-up', 'Completed', 'Patient is healthy. Routine blood work ordered.'), (3, 4, '2025-08-02 09:00:00', 'Persistent skin rash on arm', 'Completed', 'Contact dermatitis. Prescribed topical steroid cream.'), (4, 3, '2025-08-02 14:00:00', 'Follow-up for knee injury', 'Completed', 'ACL recovery is on track. Continue physiotherapy.'), (5, 2, '2025-08-03 12:00:00', 'Vaccination for 5-year-old child', 'Completed', 'Administered MMR booster shot. No adverse reactions.'), (6, 6, '2025-08-04 15:00:00', 'Severe headache and dizziness', 'Completed', 'Migraine with aura. Prescribed triptans.'), (7, 7, '2025-08-05 10:30:00', 'Acid reflux issues', 'Completed', 'Diagnosed with GERD. Recommended dietary changes.'), (8, 1, '2025-08-06 11:00:00', 'High blood pressure reading at home', 'Completed', 'Confirmed hypertension. Started on medication.'), (9, 10, '2025-08-11 16:00:00', 'Fever and cough for toddler', 'Completed', 'Viral infection. Advised rest and hydration.'), (10, 9, '2025-08-12 09:30:00', 'Ankle sprain from playing sports', 'Completed', 'Grade 2 ankle sprain. Advised RICE protocol.'), (1, 8, '2025-08-18 10:00:00', 'Follow-up consultation for Angina', 'Confirmed', NULL), (11, 4, '2025-08-19 14:30:00', 'Acne breakout treatment', 'Confirmed', NULL), (12, 7, '2025-08-20 11:00:00', 'Consultation for stomach ulcer', 'Confirmed', NULL), (13, 5, '2025-08-21 09:00:00', 'Child wellness check', 'Confirmed', NULL), (14, 3, '2025-08-22 15:30:00', 'Back pain consultation', 'Confirmed', NULL), (15, 2, '2025-07-28 10:00:00', 'Childhood immunization schedule', 'No Show', NULL), (16, 1, '2025-08-25 12:00:00', 'Heart palpitation concerns', 'Pending', NULL), (17, 4, '2025-08-26 16:00:00', 'Mole check-up', 'Pending', NULL), (18, 5, '2025-07-20 11:00:00', 'General check-up', 'Cancelled', NULL), (19, 6, '2025-08-28 10:30:00', 'Consultation for recurring migraines', 'Pending', NULL), (20, 7, '2025-08-29 11:30:00', 'Digestive issues', 'Pending', NULL);
+
+-- Table: Prescriptions
+INSERT INTO `Prescriptions` (`AppointmentID`, `PrescriptionDate`, `Notes`) VALUES
+(1, '2025-08-01', 'Take one tablet daily after breakfast. Monitor blood pressure.'), (3, '2025-08-02', 'Apply thin layer to affected area twice daily for 7 days.'), (6, '2025-08-04', 'Take one tablet at the onset of a migraine. Do not exceed 2 tablets in 24 hours.'), (8, '2025-08-06', 'Start with 5mg dose once daily in the morning.'), (9, '2025-08-11', 'Paracetamol syrup 5ml, up to 3 times a day if fever persists.'), (10, '2025-08-12', 'Pain reliever as needed. No weight-bearing for 48 hours.');
+
+-- Table: Invoices
+INSERT INTO `Invoices` (`AppointmentID`, `TotalAmount`, `InvoiceDate`, `DueDate`, `Status`) VALUES
+(1, 1500.00, '2025-08-01', '2025-08-15', 'Paid'), (2, 800.00, '2025-08-01', '2025-08-15', 'Paid'), (3, 1200.00, '2025-08-02', '2025-08-16', 'Paid'), (4, 1000.00, '2025-08-02', '2025-08-16', 'Unpaid'), (5, 950.00, '2025-08-03', '2025-08-17', 'Paid'), (6, 1800.00, '2025-08-04', '2025-08-18', 'Unpaid'), (7, 1300.00, '2025-08-05', '2025-08-19', 'Paid'), (8, 1500.00, '2025-08-06', '2025-08-20', 'Overdue'), (9, 750.00, '2025-08-11', '2025-08-25', 'Unpaid'), (10, 1000.00, '2025-08-12', '2025-08-26', 'Paid'), (16, 500.00, '2025-07-28', '2025-08-11', 'Paid');
+
+-- Table: Payments
+INSERT INTO `Payments` (`InvoiceID`, `PaymentDate`, `Amount`, `PaymentMethod`) VALUES
+(1, '2025-08-05 14:30:00', 1500.00, 'Credit Card'), (2, '2025-08-02 11:00:00', 800.00, 'Insurance'), (3, '2025-08-10 10:00:00', 1200.00, 'Bank Transfer'), (5, '2025-08-03 12:30:00', 950.00, 'Cash'), (7, '2025-08-05 11:00:00', 1300.00, 'Credit Card'), (10, '2025-08-12 10:00:00', 1000.00, 'Insurance'), (11, '2025-08-01 09:00:00', 500.00, 'Credit Card');
+
+-- Table: Expenses
+INSERT INTO `Expenses` (`Category`, `Description`, `Amount`, `ExpenseDate`, `RecordedByUserID`) VALUES
+('Medical Supplies', 'Purchase of sterile gloves and masks', 25000.00, '2025-08-01', 123), ('Utilities', 'Electricity Bill for July 2025', 85000.00, '2025-08-05', 124), ('Operational Costs', 'Annual Maintenance Contract for MRI machine', 150000.00, '2025-08-06', 123), ('Office Supplies', 'A4 paper, pens, and printer toner', 8000.00, '2025-08-08', 124), ('Medical Supplies', 'Order of antibiotics and pain relief medication', 75000.00, '2025-08-10', 123), ('Utilities', 'Water Bill for July 2025', 22000.00, '2025-08-12', 124);
+
+-- Table: Salaries
+INSERT INTO `Salaries` (`UserID`, `Amount`, `PaymentDate`, `Notes`) VALUES
+(101, 250000.00, '2025-07-31', 'Salary for July 2025'), (102, 220000.00, '2025-07-31', 'Salary for July 2025'), (103, 235000.00, '2025-07-31', 'Salary for July 2025'), (104, 180000.00, '2025-07-31', 'Salary for July 2025'),
+(121, 300000.00, '2025-07-31', 'Salary for July 2025'), (123, 150000.00, '2025-07-31', 'Salary for July 2025'),
+(101, 250000.00, '2025-06-30', 'Salary for June 2025'), (102, 220000.00, '2025-06-30', 'Salary for June 2025');
+

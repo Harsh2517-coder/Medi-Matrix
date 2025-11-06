@@ -1,0 +1,630 @@
+{% extends "base.html" %}
+{% block content %}
+<style>
+    :root {
+        --primary-medical: #2E86AB;
+        --secondary-medical: #A23B72;
+        --success-medical: #10B981;
+        --danger-medical: #EF4444;
+        --bg-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        --card-shadow: 0 15px 35px rgba(50, 50, 93, 0.1), 0 5px 15px rgba(0, 0, 0, 0.07);
+    }
+
+    .appointments-container {
+        animation: fadeInUp 0.8s ease-out;
+    }
+
+    @keyframes fadeInUp {
+        from { opacity: 0; transform: translateY(30px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    .page-header {
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(20px);
+        border-radius: 20px;
+        padding: 2rem;
+        box-shadow: var(--card-shadow);
+        margin-bottom: 2rem;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .page-title {
+        background: var(--bg-gradient);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        font-weight: 800;
+        font-size: 2.2rem;
+        margin: 0;
+        display: flex;
+        align-items: center;
+        gap: 15px;
+    }
+
+    .title-icon {
+        color: #667eea;
+        font-size: 2rem;
+        animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+        0%, 100% { transform: scale(1); }
+        50% { transform: scale(1.1); }
+    }
+
+    .back-btn {
+        background: linear-gradient(135deg, #6B73FF 0%, #000DFF 100%);
+        border: none;
+        border-radius: 50px;
+        padding: 0.75rem 1.5rem;
+        color: white;
+        font-weight: 600;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        transition: all 0.3s cubic-bezier(0.23, 1, 0.320, 1);
+        box-shadow: 0 4px 15px rgba(107, 115, 255, 0.3);
+    }
+
+    .back-btn:hover {
+        transform: translateY(-2px) scale(1.05);
+        box-shadow: 0 8px 25px rgba(107, 115, 255, 0.4);
+        color: white;
+    }
+
+    .table-container {
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(20px);
+        border-radius: 20px;
+        padding: 2rem;
+        box-shadow: var(--card-shadow);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        overflow: hidden;
+    }
+
+    .table { 
+        margin: 0; 
+        background: transparent; 
+        table-layout: fixed;
+        width: 100%;
+        border-collapse: separate;
+        border-spacing: 0;
+    }
+
+    .table thead th {
+        background: var(--bg-gradient);
+        color: white;
+        border: none;
+        font-weight: 600;
+        padding: 1rem;
+        text-transform: uppercase;
+        font-size: 0.875rem;
+        letter-spacing: 0.5px;
+        white-space: nowrap;
+        text-align: left !important;
+    }
+
+    .table thead th:first-child { 
+        border-radius: 15px 0 0 0; 
+        width: 18%;
+    }
+    .table thead th:nth-child(2) { 
+        width: 18%;
+    }
+    .table thead th:nth-child(3) { 
+        width: 18%;
+    }
+    .table thead th:nth-child(4) { 
+        width: 26%;
+    }
+    .table thead th:last-child { 
+        border-radius: 0 15px 0 0; 
+        width: 20%;
+    }
+
+    .table tbody tr { 
+        display: table-row !important;
+        transition: all 0.3s ease; 
+        border: none; 
+    }
+    .table tbody tr:hover {
+        background: rgba(102, 126, 234, 0.05);
+        transform: scale(1.01);
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+    }
+
+    .table tbody td {
+        display: table-cell !important;
+        padding: 1.2rem 1rem !important;
+        padding-left: 1rem !important;
+        padding-right: 1rem !important;
+        border: none;
+        vertical-align: middle !important;
+        border-bottom: 1px solid rgba(102, 126, 234, 0.1);
+        text-align: left !important;
+        position: relative;
+    }
+
+    /* First 4 columns - prevent wrapping */
+    .table tbody td:nth-child(1),
+    .table tbody td:nth-child(2),
+    .table tbody td:nth-child(3),
+    .table tbody td:nth-child(4) {
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    /* Last column - allow wrapping for buttons */
+    .table tbody td:last-child {
+        white-space: normal;
+        overflow: visible;
+        text-align: left !important;
+    }
+
+    /* Ensure proper alignment - keep inline display for table cells */
+    .patient-name, .doctor-name, .appointment-time {
+        font-weight: 600;
+        display: inline-block;
+        margin: 0 !important;
+        padding: 0 !important;
+        text-align: left !important;
+        max-width: 100%;
+    }
+    
+    .patient-name { 
+        color: #1e293b; 
+    }
+    .doctor-name { 
+        color: #059669; 
+    }
+    
+    .appointment-time {
+        background: linear-gradient(135deg, #4ECDC4, #2E86AB);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+
+    .reason-text {
+        color: #64748b;
+        font-style: italic;
+        max-width: 100%;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        display: inline-block;
+        margin: 0 !important;
+        padding: 0 !important;
+        text-align: left !important;
+    }
+
+    .action-buttons { 
+        display: flex !important; 
+        gap: 8px; 
+        justify-content: flex-start !important;
+        align-items: center;
+        flex-wrap: wrap;
+        margin: 0 !important;
+        padding: 0 !important;
+        width: 100%;
+    }
+
+    /* Enhanced Approve and Decline Button Styles */
+    .btn-approve, .btn-decline {
+        border: none !important;
+        border-radius: 50px !important;
+        padding: 0.6rem 1.2rem !important;
+        font-weight: 600 !important;
+        font-size: 0.875rem !important;
+        color: white !important;
+        text-decoration: none !important;
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        gap: 0.5rem !important;
+        transition: all 0.3s cubic-bezier(0.23, 1, 0.320, 1) !important;
+        cursor: pointer !important;
+        white-space: nowrap !important;
+        min-width: 100px !important;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2) !important;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .btn-approve {
+        background: linear-gradient(135deg, #10b981 0%, #059669 100%) !important;
+        box-shadow: 0 6px 20px rgba(16, 185, 129, 0.35) !important;
+    }
+
+    .btn-approve:hover {
+        transform: translateY(-2px) scale(1.05) !important;
+        box-shadow: 0 10px 30px rgba(16, 185, 129, 0.5) !important;
+        color: white !important;
+        text-decoration: none !important;
+    }
+
+    .btn-approve:active {
+        transform: translateY(0) scale(1) !important;
+    }
+
+    .btn-approve::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+        transition: left 0.5s ease;
+    }
+
+    .btn-approve:hover::before {
+        left: 100%;
+    }
+
+    .btn-decline {
+        background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%) !important;
+        box-shadow: 0 6px 20px rgba(239, 68, 68, 0.35) !important;
+    }
+
+    .btn-decline:hover {
+        transform: translateY(-2px) scale(1.05) !important;
+        box-shadow: 0 10px 30px rgba(239, 68, 68, 0.5) !important;
+        color: white !important;
+        text-decoration: none !important;
+    }
+
+    .btn-decline:active {
+        transform: translateY(0) scale(1) !important;
+    }
+
+    .btn-decline::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+        transition: left 0.5s ease;
+    }
+
+    .btn-decline:hover::before {
+        left: 100%;
+    }
+
+    /* Icon styling inside buttons */
+    .btn-approve span, .btn-decline span {
+        font-size: 1rem;
+        font-weight: 700;
+        margin: 0;
+        line-height: 1;
+    }
+
+    .empty-state { text-align: center; padding: 4rem 2rem; color: #64748b; }
+    .empty-icon { font-size: 4rem; color: var(--success-medical); margin-bottom: 1rem; animation: bounce 2s infinite; }
+
+    @keyframes bounce {
+        0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+        40% { transform: translateY(-10px); }
+        60% { transform: translateY(-5px); }
+    }
+
+    .empty-title { font-size: 1.5rem; font-weight: 700; color: #1e293b; margin-bottom: 0.5rem; }
+    
+    .request-row {
+        opacity: 0;
+        animation: slideInFromLeft 0.6s ease-out forwards;
+        animation-delay: calc(var(--animation-order) * 100ms);
+    }
+
+    @keyframes slideInFromLeft {
+        from { opacity: 0; transform: translateX(-30px); }
+        to { opacity: 1; transform: translateX(0); }
+    }
+
+    /* Search and Filter Styles */
+    .search-filter-container {
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(20px);
+        border-radius: 15px;
+        padding: 1.5rem;
+        margin-bottom: 1.5rem;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+        display: flex;
+        gap: 1rem;
+        flex-wrap: wrap;
+        align-items: center;
+    }
+
+    .search-box {
+        flex: 1;
+        min-width: 250px;
+        position: relative;
+    }
+
+    .search-box input {
+        width: 100%;
+        padding: 0.75rem 1rem 0.75rem 2.5rem;
+        border: 2px solid rgba(30, 64, 175, 0.2);
+        border-radius: 10px;
+        font-size: 0.95rem;
+        transition: all 0.3s ease;
+    }
+
+    .search-box input:focus {
+        outline: none;
+        border-color: var(--hospital-blue);
+        box-shadow: 0 0 0 3px rgba(30, 64, 175, 0.1);
+    }
+
+    .search-box::before {
+        content: '🔍';
+        position: absolute;
+        left: 0.75rem;
+        top: 50%;
+        transform: translateY(-50%);
+        font-size: 1.1rem;
+    }
+
+    .pagination-info {
+        color: #64748b;
+        font-size: 0.9rem;
+        font-weight: 500;
+    }
+
+    .pagination-controls {
+        display: flex;
+        gap: 0.5rem;
+        align-items: center;
+        margin-top: 1rem;
+        justify-content: center;
+    }
+
+    .pagination-btn {
+        padding: 0.5rem 1rem;
+        border: 1px solid rgba(30, 64, 175, 0.2);
+        border-radius: 8px;
+        background: white;
+        color: var(--hospital-blue);
+        cursor: pointer;
+        transition: all 0.3s ease;
+        font-weight: 600;
+    }
+
+    .pagination-btn:hover:not(:disabled) {
+        background: var(--hospital-blue);
+        color: white;
+        transform: translateY(-2px);
+    }
+
+    .pagination-btn:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+    }
+
+    .pagination-btn.active {
+        background: var(--hospital-blue);
+        color: white;
+    }
+
+    /* Loading Spinner */
+    .loading-spinner {
+        display: none;
+        text-align: center;
+        padding: 2rem;
+    }
+
+    .spinner {
+        border: 4px solid rgba(30, 64, 175, 0.1);
+        border-top: 4px solid var(--hospital-blue);
+        border-radius: 50%;
+        width: 50px;
+        height: 50px;
+        animation: spin 1s linear infinite;
+        margin: 0 auto;
+    }
+
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+
+    .table-container.loading .table-responsive {
+        opacity: 0.5;
+        pointer-events: none;
+    }
+
+    .table-container.loading .loading-spinner {
+        display: block;
+    }
+</style>
+
+<div class="appointments-container">
+    <div class="page-header d-flex justify-content-between align-items-center">
+        <h2 class="page-title">
+            <i class="fas fa-calendar-check title-icon"></i>
+            Pending Appointment Requests
+        </h2>
+        <a href="{{ url_for('admin.dashboard') }}" class="back-btn">
+            <i class="fas fa-arrow-left"></i>
+            Back to Dashboard
+        </a>
+    </div>
+
+    <div class="search-filter-container">
+        <div class="search-box">
+            <input type="text" id="searchInput" placeholder="Search by patient name, doctor name, or reason...">
+        </div>
+        <div class="pagination-info">
+            Showing <span id="showingCount">0</span> of <span id="totalCount">0</span> requests
+        </div>
+    </div>
+
+    <div class="table-container" id="tableContainer">
+        <div class="loading-spinner">
+            <div class="spinner"></div>
+            <p style="margin-top: 1rem; color: #64748b;">Loading appointments...</p>
+        </div>
+        <div class="table-responsive">
+            <table class="table" id="appointmentsTable">
+                <thead>
+                    <tr>
+                        <th>Requested Date & Time</th>
+                        <th>Patient Name</th>
+                        <th>Requested Doctor</th>
+                        <th>Reason</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for request in requests %}
+                    <tr class="request-row" style="--animation-order: {{ loop.index }};">
+                        <td class="appointment-time">{{ request.AppointmentDateTime.strftime('%d %b %Y, %I:%M %p') }}</td>
+                        <td class="patient-name">{{ request.pFirstName }} {{ request.pLastName }}</td>
+                        <td class="doctor-name">Dr. {{ request.dFirstName }} {{ request.dLastName }}</td>
+                        <td class="reason-text" title="{{ request.Reason }}">{{ request.Reason }}</td>
+                        <td>
+                            <div class="action-buttons">
+                                <a href="{{ url_for('admin.approve_appointment', appointment_id=request.AppointmentID) }}" 
+                                   class="btn-approve"
+                                   onclick="return confirm('Are you sure you want to APPROVE this appointment for {{ request.pFirstName }} {{ request.pLastName }} with Dr. {{ request.dFirstName }} {{ request.dLastName }}?');">
+                                    <span>✓</span> Approve
+                                </a>
+                                <a href="{{ url_for('admin.decline_appointment', appointment_id=request.AppointmentID) }}" 
+                                   class="btn-decline"
+                                   onclick="return confirm('Are you sure you want to DECLINE this appointment for {{ request.pFirstName }} {{ request.pLastName }}? This action cannot be undone.');">
+                                    <span>✗</span> Decline
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="5" class="empty-state">
+                            <div class="empty-icon"><i class="fas fa-clipboard-check"></i></div>
+                            <div class="empty-title">All Caught Up!</div>
+                            <div>No pending appointment requests. Well done!</div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        <div class="pagination-controls" id="paginationControls"></div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const table = document.getElementById('appointmentsTable');
+    const searchInput = document.getElementById('searchInput');
+    const tableContainer = document.getElementById('tableContainer');
+    const showingCount = document.getElementById('showingCount');
+    const totalCount = document.getElementById('totalCount');
+    const paginationControls = document.getElementById('paginationControls');
+    
+    let allRows = Array.from(table.querySelectorAll('tbody tr'));
+    let filteredRows = allRows;
+    let currentPage = 1;
+    const itemsPerPage = 10;
+
+    // Hide loading spinner after page loads
+    setTimeout(() => {
+        tableContainer.classList.remove('loading');
+        updateDisplay();
+    }, 500);
+
+    // Search functionality
+    searchInput.addEventListener('input', function() {
+        const searchTerm = this.value.toLowerCase().trim();
+        filteredRows = allRows.filter(row => {
+            const text = row.textContent.toLowerCase();
+            return text.includes(searchTerm);
+        });
+        currentPage = 1;
+        updateDisplay();
+    });
+
+    // Pagination
+    function updateDisplay() {
+        const startIndex = (currentPage - 1) * itemsPerPage;
+        const endIndex = startIndex + itemsPerPage;
+        const rowsToShow = filteredRows.slice(startIndex, endIndex);
+
+        // Hide all rows
+        allRows.forEach(row => row.style.display = 'none');
+
+        // Show filtered rows for current page
+        rowsToShow.forEach(row => row.style.display = 'table-row');
+
+        // Update counts
+        const total = filteredRows.length;
+        const showing = Math.min(endIndex, total);
+        totalCount.textContent = total;
+        showingCount.textContent = showing > 0 ? showing : 0;
+
+        // Update pagination controls
+        updatePagination(total);
+    }
+
+    function updatePagination(total) {
+        const totalPages = Math.ceil(total / itemsPerPage);
+        paginationControls.innerHTML = '';
+
+        if (totalPages <= 1) return;
+
+        // Previous button
+        const prevBtn = document.createElement('button');
+        prevBtn.className = 'pagination-btn';
+        prevBtn.textContent = '← Previous';
+        prevBtn.disabled = currentPage === 1;
+        prevBtn.onclick = () => {
+            if (currentPage > 1) {
+                currentPage--;
+                updateDisplay();
+            }
+        };
+        paginationControls.appendChild(prevBtn);
+
+        // Page numbers
+        for (let i = 1; i <= totalPages; i++) {
+            if (i === 1 || i === totalPages || (i >= currentPage - 1 && i <= currentPage + 1)) {
+                const pageBtn = document.createElement('button');
+                pageBtn.className = 'pagination-btn' + (i === currentPage ? ' active' : '');
+                pageBtn.textContent = i;
+                pageBtn.onclick = () => {
+                    currentPage = i;
+                    updateDisplay();
+                };
+                paginationControls.appendChild(pageBtn);
+            } else if (i === currentPage - 2 || i === currentPage + 2) {
+                const ellipsis = document.createElement('span');
+                ellipsis.textContent = '...';
+                ellipsis.style.padding = '0.5rem';
+                paginationControls.appendChild(ellipsis);
+            }
+        }
+
+        // Next button
+        const nextBtn = document.createElement('button');
+        nextBtn.className = 'pagination-btn';
+        nextBtn.textContent = 'Next →';
+        nextBtn.disabled = currentPage === totalPages;
+        nextBtn.onclick = () => {
+            if (currentPage < totalPages) {
+                currentPage++;
+                updateDisplay();
+            }
+        };
+        paginationControls.appendChild(nextBtn);
+    }
+
+    // Initial display
+    updateDisplay();
+});
+</script>
+{% endblock %}

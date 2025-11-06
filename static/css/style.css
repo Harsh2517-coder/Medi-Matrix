@@ -1,0 +1,34 @@
+/* static/css/style.css */
+
+/* Import a nice font for the brand name */
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@600&display=swap');
+
+body {
+    background-color: #f8f9fa; /* A slightly off-white background for a softer look */
+}
+
+.navbar-brand {
+    font-family: 'Poppins', sans-serif;
+    font-weight: 600;
+}
+
+/* Make the admin dashboard cards interactive */
+.card-metric {
+    transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+}
+
+.card-metric:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+/* Style for scrollable tables on the accountant dashboard */
+.table-scrollable {
+    max-height: 450px;
+    overflow-y: auto;
+}
+
+/* A subtle touch for table headers */
+.table thead th {
+    background-color: #e9ecef;
+}

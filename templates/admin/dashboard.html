@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MediMatrix Hospital - Admin Dashboard</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary-medical: #2E86AB;
+            --secondary-medical: #A23B72;
+            --success-medical: #F18F01;
+            --warning-medical: #C73E1D;
+            --info-medical: #4ECDC4;
+            --bg-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --card-shadow: 0 15px 35px rgba(50, 50, 93, 0.1), 0 5px 15px rgba(0, 0, 0, 0.07);
+        }
+
+        body {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        .dashboard-container {
+            padding: 2rem;
+            animation: fadeInUp 0.8s ease-out;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .dashboard-header {
+            margin-bottom: 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 15px;
+        }
+
+        .dashboard-header h2 {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            font-weight: 800;
+            font-size: 2.5rem;
+            margin: 0;
+        }
+
+        .dashboard-header-content {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .logout-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            border-radius: 12px;
+            padding: 0.75rem 1.5rem;
+            color: white;
+            font-weight: 600;
+            font-size: 0.95rem;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s cubic-bezier(0.23, 1, 0.320, 1);
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+            cursor: pointer;
+        }
+
+        .logout-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+            color: white;
+            text-decoration: none;
+        }
+
+        .logout-btn i {
+            font-size: 1rem;
+        }
+
+        @media (max-width: 768px) {
+            .dashboard-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 1rem;
+            }
+
+            .logout-btn {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+
+        .crown-icon {
+            color: #FFD700;
+            font-size: 2rem;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
+        .stat-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 20px;
+            padding: 2rem;
+            box-shadow: var(--card-shadow);
+            transition: all 0.4s cubic-bezier(0.23, 1, 0.320, 1);
+            position: relative;
+            overflow: hidden;
+            height: 180px;
+        }
+
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: var(--card-gradient);
+            transition: height 0.3s ease;
+        }
+
+        .stat-card:hover::before {
+            height: 8px;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-10px) scale(1.02);
+            box-shadow: 0 25px 50px rgba(50, 50, 93, 0.15), 0 15px 35px rgba(0, 0, 0, 0.1);
+        }
+
+        .stat-card.doctors { --card-gradient: linear-gradient(135deg, #667eea, #764ba2); }
+        .stat-card.beds { --card-gradient: linear-gradient(135deg, #4ECDC4, #2E86AB); }
+        .stat-card.patients { --card-gradient: linear-gradient(135deg, #F18F01, #F7B731); }
+        .stat-card.appointments { --card-gradient: linear-gradient(135deg, #C73E1D, #E55A4E); }
+        .stat-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            background: var(--card-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .stat-number {
+            font-size: 3rem;
+            font-weight: 800;
+            background: var(--card-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            line-height: 1;
+        }
+
+        .stat-title {
+            font-weight: 600;
+            color: #64748b;
+            font-size: 1.1rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-subtitle {
+            color: #94a3b8;
+            font-size: 0.875rem;
+        }
+
+        .divider {
+            height: 2px;
+            background: linear-gradient(90deg, transparent, #667eea, #764ba2, transparent);
+            border: none;
+            margin: 3rem 0;
+        }
+
+        .section-title {
+            color: #1e293b;
+            font-weight: 700;
+            font-size: 1.8rem;
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .action-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border: none;
+            border-radius: 15px;
+            margin-bottom: 1rem;
+            overflow: hidden;
+            transition: all 0.3s cubic-bezier(0.23, 1, 0.320, 1);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+        }
+
+        .action-card:hover {
+            transform: translateX(10px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+            background: rgba(255, 255, 255, 1);
+        }
+
+        .action-item {
+            padding: 1.5rem;
+            color: #1e293b;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: relative;
+        }
+
+        .action-item::before {
+            content: '';
+            position: absolute;
+            left: 0; top: 0; bottom: 0;
+            width: 0;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            transition: width 0.3s ease;
+        }
+
+        .action-item:hover::before {
+            width: 4px;
+        }
+
+        .action-content { display: flex; align-items: center; gap: 15px; }
+        .action-icon { font-size: 1.5rem; color: #667eea; }
+        .action-text { font-weight: 600; font-size: 1.1rem; }
+        .badge-modern {
+            background: linear-gradient(135deg, #C73E1D, #E55A4E);
+            padding: 0.5rem 1rem;
+            border-radius: 50px;
+            font-weight: 600;
+            box-shadow: 0 4px 15px rgba(199, 62, 29, 0.3);
+            animation: bounce 2s infinite;
+            color: white;
+        }
+
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+            40% { transform: translateY(-5px); }
+            60% { transform: translateY(-3px); }
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard-container">
+        <div class="dashboard-header">
+            <div class="dashboard-header-content">
+                <i class="fas fa-crown crown-icon"></i>
+                <h2>Administrator Dashboard</h2>
+            </div>
+            <a href="{{ url_for('auth.logout') }}" class="logout-btn">
+                <i class="fas fa-sign-out-alt"></i>
+                Logout
+            </a>
+        </div>
+
+        <div class="row g-4">
+            <div class="col-lg-3 col-md-6">
+                <div class="stat-card doctors">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div>
+                            <div class="stat-title">Doctors Available</div>
+                            <div class="stat-number" data-target="{{ doctor_count }}">0</div>
+                            <div class="stat-subtitle">Active physicians</div>
+                        </div>
+                        <div class="stat-icon"><i class="fas fa-user-md"></i></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-3 col-md-6">
+                <div class="stat-card beds">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div>
+                            <div class="stat-title">Beds Available</div>
+                            <div class="stat-number" data-target="{{ beds_available }}">0</div>
+                            <div class="stat-subtitle">Ready for patients</div>
+                        </div>
+                        <div class="stat-icon"><i class="fas fa-bed"></i></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-3 col-md-6">
+                <div class="stat-card patients">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div>
+                            <div class="stat-title">Total Patients</div>
+                            <div class="stat-number" data-target="{{ patient_count }}">0</div>
+                            <div class="stat-subtitle">Registered patients</div>
+                        </div>
+                        <div class="stat-icon"><i class="fas fa-users"></i></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-3 col-md-6">
+                <div class="stat-card appointments">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div>
+                            <div class="stat-title">Pending Requests</div>
+                            <div class="stat-number" data-target="{{ pending_appointments }}">0</div>
+                            <div class="stat-subtitle">Awaiting approval</div>
+                        </div>
+                        <div class="stat-icon"><i class="fas fa-clock"></i></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="divider"></div>
+
+        <h3 class="section-title">
+            <i class="fas fa-cogs" style="color: #667eea;"></i>
+            Admin Actions
+        </h3>
+
+        <div class="row">
+            <div class="col-12">
+                <div class="action-card">
+                    <a href="{{ url_for('admin.appointment_requests') }}" class="action-item">
+                        <div class="action-content">
+                            <i class="fas fa-calendar-check action-icon"></i>
+                            <div>
+                                <div class="action-text">Manage Appointment Requests</div>
+                                <small class="text-muted">Review and approve pending appointments</small>
+                            </div>
+                        </div>
+                        <span class="badge-modern">{{ pending_appointments }}</span>
+                    </a>
+                </div>
+
+                <div class="action-card">
+                    <a href="{{ url_for('admin.staff_list') }}" class="action-item">
+                        <div class="action-content">
+                            <i class="fas fa-user-friends action-icon"></i>
+                            <div>
+                                <div class="action-text">View All Staff & Doctors</div>
+                                <small class="text-muted">Manage hospital staff and medical personnel</small>
+                            </div>
+                        </div>
+                        <i class="fas fa-chevron-right" style="color: #94a3b8;"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const statNumbers = document.querySelectorAll('.stat-number');
+            
+            const observer = new IntersectionObserver(entries => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        const stat = entry.target;
+                        const finalNumber = parseInt(stat.getAttribute('data-target'), 10);
+                        let currentNumber = 0;
+                        const increment = Math.max(1, Math.ceil(finalNumber / 100));
+                        
+                        const timer = setInterval(() => {
+                            currentNumber += increment;
+                            if (currentNumber >= finalNumber) {
+                                currentNumber = finalNumber;
+                                clearInterval(timer);
+                            }
+                            stat.textContent = currentNumber.toLocaleString();
+                        }, 15);
+                        observer.unobserve(stat); // Animate only once
+                    }
+                });
+            }, { threshold: 0.1 });
+
+            statNumbers.forEach(stat => {
+                observer.observe(stat);
+            });
+        });
+    </script>
+</body>
+</html>

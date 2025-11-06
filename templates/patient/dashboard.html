@@ -1,0 +1,593 @@
+{% extends "base.html" %}
+{% block content %}
+
+<style>
+    /* --- Page Header Styling --- */
+    .page-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 1rem;
+        margin-bottom: 2rem;
+        padding-bottom: 1rem;
+        border-bottom: 1px solid rgba(30, 64, 175, 0.1);
+        animation: fadeIn 0.5s ease-out forwards;
+        opacity: 0;
+    }
+
+    .page-title {
+        font-weight: 800;
+        font-size: 2.5rem;
+        background: linear-gradient(135deg, var(--hospital-blue) 20%, var(--hospital-teal) 100%);
+        background-clip: text;
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        margin: 0;
+    }
+    
+    /* Button styles are now standardized in base.html */
+
+    /* --- Flash Messages Styling --- */
+    .alert {
+        border-radius: 1rem;
+        border: none;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        margin-bottom: 1.5rem;
+        animation: slideDown 0.3s ease-out;
+    }
+
+    @keyframes slideDown {
+        from {
+            opacity: 0;
+            transform: translateY(-10px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    /* --- Appointment Cards Grid Layout --- */
+    .appointments-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+        gap: 1.5rem;
+    }
+
+    .appointment-card {
+        background: rgba(255, 255, 255, 0.8) !important;
+        backdrop-filter: blur(20px) saturate(180%);
+        border: 1px solid rgba(255, 255, 255, 0.5);
+        border-radius: 1.5rem;
+        box-shadow: 0 15px 30px rgba(30, 64, 175, 0.08);
+        transition: transform 0.4s ease, box-shadow 0.4s ease;
+        opacity: 0;
+        transform: translateY(20px);
+        animation: slideInUp 0.6s ease-out forwards;
+        animation-delay: calc(var(--animation-order, 0) * 100ms);
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+        position: relative;
+    }
+
+    .appointment-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: linear-gradient(90deg, var(--hospital-blue), var(--hospital-teal), var(--medical-mint));
+        opacity: 0;
+        transition: opacity 0.3s ease;
+    }
+
+    .appointment-card:hover::before {
+        opacity: 1;
+    }
+
+    @keyframes slideInUp {
+        to { 
+            opacity: 1; 
+            transform: translateY(0); 
+        }
+    }
+
+    @keyframes fadeIn {
+        to { 
+            opacity: 1; 
+        }
+    }
+
+    .appointment-card:hover {
+        transform: translateY(-8px);
+        box-shadow: 0 25px 50px rgba(30, 64, 175, 0.15);
+    }
+
+    .card-header {
+        padding: 1.5rem;
+        border-bottom: 1px solid rgba(226, 232, 240, 1);
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        gap: 1rem;
+    }
+    
+    .doctor-info {
+        font-size: 1.25rem;
+        font-weight: 700;
+        color: var(--deep-navy);
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    
+    .doctor-info::before {
+        content: '👨‍⚕️';
+        font-size: 1.5rem;
+    }
+    
+    .appointment-status {
+        padding: 0.4rem 1rem;
+        font-weight: 600;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        white-space: nowrap;
+    }
+    
+    /* Dynamic Status Badge Colors */
+    .status-confirmed { 
+        background-color: rgba(30,64,175,.1); 
+        color: var(--hospital-blue); 
+        box-shadow: 0 0 15px rgba(30,64,175,.2); 
+    }
+    .status-completed { 
+        background-color: rgba(5,150,105,.1); 
+        color: var(--hospital-green); 
+        box-shadow: 0 0 15px rgba(5,150,105,.2); 
+    }
+    .status-cancelled { 
+        background-color: rgba(153,27,27,.1); 
+        color: #991b1b; 
+        box-shadow: 0 0 15px rgba(153,27,27,.2); 
+    }
+    .status-pending { 
+        background-color: rgba(100,116,139,.1); 
+        color: #64748b; 
+        box-shadow: 0 0 15px rgba(100,116,139,.2); 
+    }
+
+    .card-body {
+        padding: 1.5rem;
+        flex-grow: 1;
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+    }
+    
+    .detail-item { 
+        margin-bottom: 0.5rem; 
+    }
+    
+    .detail-item strong {
+        display: block;
+        font-size: 0.75rem;
+        font-weight: 600;
+        color: #64748b;
+        text-transform: uppercase;
+        margin-bottom: 0.25rem;
+        letter-spacing: 0.5px;
+    }
+    
+    .detail-item span {
+        font-size: 1rem;
+        font-weight: 500;
+        color: var(--deep-navy);
+        display: block;
+    }
+    
+    .specialization-badge {
+        display: inline-block;
+        padding: 0.3rem 0.8rem;
+        background: linear-gradient(135deg, rgba(30,64,175,.1), rgba(8,145,178,.1));
+        color: var(--hospital-blue);
+        border-radius: 12px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        margin-top: 0.25rem;
+    }
+
+    .no-appointments-card {
+        grid-column: 1 / -1;
+        text-align: center;
+        padding: 4rem 2rem;
+        background: rgba(255, 255, 255, 0.8) !important;
+        backdrop-filter: blur(20px) saturate(180%);
+        border: 1px solid rgba(255, 255, 255, 0.5);
+        border-radius: 1.5rem;
+        box-shadow: 0 15px 30px rgba(30, 64, 175, 0.08);
+    }
+    
+    .no-appointments-card h4 {
+        color: var(--deep-navy);
+        font-weight: 600;
+        margin-bottom: 1rem;
+    }
+    
+    .no-appointments-card p {
+        color: #64748b;
+        margin-bottom: 1.5rem;
+    }
+    
+    .no-appointments-icon {
+        font-size: 4rem;
+        margin-bottom: 1rem;
+        opacity: 0.3;
+    }
+
+    /* Search and Pagination Styles */
+    .search-pagination-container {
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(20px);
+        border-radius: 15px;
+        padding: 1.5rem;
+        margin-bottom: 1.5rem;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+        display: flex;
+        gap: 1rem;
+        flex-wrap: wrap;
+        align-items: center;
+    }
+
+    .search-box {
+        flex: 1;
+        min-width: 250px;
+        position: relative;
+    }
+
+    .search-box input {
+        width: 100%;
+        padding: 0.75rem 1rem 0.75rem 2.5rem;
+        border: 2px solid rgba(30, 64, 175, 0.2);
+        border-radius: 10px;
+        font-size: 0.95rem;
+        transition: all 0.3s ease;
+    }
+
+    .search-box input:focus {
+        outline: none;
+        border-color: var(--hospital-blue);
+        box-shadow: 0 0 0 3px rgba(30, 64, 175, 0.1);
+    }
+
+    .search-box::before {
+        content: '🔍';
+        position: absolute;
+        left: 0.75rem;
+        top: 50%;
+        transform: translateY(-50%);
+        font-size: 1.1rem;
+    }
+
+    .pagination-info {
+        color: #64748b;
+        font-size: 0.9rem;
+        font-weight: 500;
+    }
+
+    .pagination-controls {
+        display: flex;
+        gap: 0.5rem;
+        align-items: center;
+        margin-top: 1rem;
+        justify-content: center;
+        flex-wrap: wrap;
+    }
+
+    .pagination-btn {
+        padding: 0.5rem 1rem;
+        border: 1px solid rgba(30, 64, 175, 0.2);
+        border-radius: 8px;
+        background: white;
+        color: var(--hospital-blue);
+        cursor: pointer;
+        transition: all 0.3s ease;
+        font-weight: 600;
+        font-size: 0.9rem;
+    }
+
+    .pagination-btn:hover:not(:disabled) {
+        background: var(--hospital-blue);
+        color: white;
+        transform: translateY(-2px);
+    }
+
+    .pagination-btn:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+    }
+
+    .pagination-btn.active {
+        background: var(--hospital-blue);
+        color: white;
+    }
+
+    /* Loading Spinner */
+    .loading-overlay {
+        display: none;
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(255, 255, 255, 0.9);
+        backdrop-filter: blur(5px);
+        z-index: 10;
+        align-items: center;
+        justify-content: center;
+        border-radius: 1.5rem;
+    }
+
+    .loading-spinner {
+        text-align: center;
+    }
+
+    .spinner {
+        border: 4px solid rgba(30, 64, 175, 0.1);
+        border-top: 4px solid var(--hospital-blue);
+        border-radius: 50%;
+        width: 50px;
+        height: 50px;
+        animation: spin 1s linear infinite;
+        margin: 0 auto;
+    }
+
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+
+    .appointments-grid-wrapper {
+        position: relative;
+    }
+
+    .appointments-grid-wrapper.loading .loading-overlay {
+        display: flex;
+    }
+
+    /* Responsive Design */
+    @media (max-width: 768px) {
+        .page-header {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+        
+        .page-title {
+            font-size: 2rem;
+        }
+        
+        .appointments-grid {
+            grid-template-columns: 1fr;
+        }
+        
+        .header-actions .btn {
+            width: 100%;
+            justify-content: center;
+        }
+    }
+</style>
+
+<div class="page-header">
+    <h2 class="page-title">My Appointment History 📋</h2>
+    <div class="header-actions">
+        <a href="{{ url_for('patient.book_appointment') }}" class="btn btn-book-appointment" id="book-appointment-btn">
+            <span>📅</span>
+            Book New Appointment
+        </a>
+    </div>
+</div>
+
+{% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+        {% for category, message in messages %}
+            <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        {% endfor %}
+    {% endif %}
+{% endwith %}
+
+{% if appointments %}
+<div class="search-pagination-container">
+    <div class="search-box">
+        <input type="text" id="searchInput" placeholder="Search appointments by doctor, specialization, or status...">
+    </div>
+    <div class="pagination-info">
+        Showing <span id="showingCount">0</span> of <span id="totalCount">0</span> appointments
+    </div>
+</div>
+{% endif %}
+
+<div class="appointments-grid-wrapper" id="appointmentsWrapper">
+    <div class="loading-overlay">
+        <div class="loading-spinner">
+            <div class="spinner"></div>
+            <p style="margin-top: 1rem; color: #64748b;">Loading appointments...</p>
+        </div>
+    </div>
+    <div class="appointments-grid" id="appointmentsGrid">
+    {% for app in appointments %}
+    <div class="appointment-card" style="--animation-order: {{ loop.index }};">
+        <div class="card-header">
+            <span class="doctor-info">Dr. {{ app.FirstName }} {{ app.LastName }}</span>
+            <span class="appointment-status status-{{ app.Status | lower | replace(' ', '-') }}">
+                {{ app.Status }}
+            </span>
+        </div>
+        <div class="card-body">
+            <div class="detail-item">
+                <strong>📅 Date & Time</strong>
+                <span>{{ app.AppointmentDateTime.strftime('%d %b %Y, %I:%M %p') }}</span>
+            </div>
+            <div class="detail-item">
+                <strong>🏥 Specialization</strong>
+                <span class="specialization-badge">{{ app.SpecializationName }}</span>
+            </div>
+            {% if app.Diagnosis %}
+            <div class="detail-item">
+                <strong>💊 Diagnosis</strong>
+                <span>{{ app.Diagnosis }}</span>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+    {% else %}
+    <div class="appointment-card no-appointments-card" style="--animation-order: 0;">
+        <div class="no-appointments-icon">📅</div>
+        <h4>No Appointments Yet</h4>
+        <p>You haven't booked any appointments. Start by booking your first appointment!</p>
+        <a href="{{ url_for('patient.book_appointment') }}" class="btn btn-book-appointment">
+            <span>📅</span>
+            Book Your First Appointment
+        </a>
+    </div>
+    {% endfor %}
+    </div>
+    <div class="pagination-controls" id="paginationControls"></div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const bookBtn = document.getElementById('book-appointment-btn');
+    const searchInput = document.getElementById('searchInput');
+    const appointmentsWrapper = document.getElementById('appointmentsWrapper');
+    const appointmentsGrid = document.getElementById('appointmentsGrid');
+    const showingCount = document.getElementById('showingCount');
+    const totalCount = document.getElementById('totalCount');
+    const paginationControls = document.getElementById('paginationControls');
+    
+    // Hide loading spinner after page loads
+    if (appointmentsWrapper) {
+        setTimeout(() => {
+            appointmentsWrapper.classList.remove('loading');
+        }, 500);
+    }
+
+    // Search and Pagination functionality
+    if (searchInput && appointmentsGrid) {
+        let allCards = Array.from(appointmentsGrid.querySelectorAll('.appointment-card'));
+        let filteredCards = allCards;
+        let currentPage = 1;
+        const itemsPerPage = 6;
+
+        // Search functionality
+        searchInput.addEventListener('input', function() {
+            const searchTerm = this.value.toLowerCase().trim();
+            filteredCards = allCards.filter(card => {
+                const text = card.textContent.toLowerCase();
+                return text.includes(searchTerm);
+            });
+            currentPage = 1;
+            updateDisplay();
+        });
+
+        // Pagination
+        function updateDisplay() {
+            const startIndex = (currentPage - 1) * itemsPerPage;
+            const endIndex = startIndex + itemsPerPage;
+            const cardsToShow = filteredCards.slice(startIndex, endIndex);
+
+            // Hide all cards
+            allCards.forEach(card => card.style.display = 'none');
+
+            // Show filtered cards for current page
+            cardsToShow.forEach(card => card.style.display = 'flex');
+
+            // Update counts
+            const total = filteredCards.length;
+            const showing = Math.min(endIndex, total);
+            if (totalCount) totalCount.textContent = total;
+            if (showingCount) showingCount.textContent = showing > 0 ? showing : 0;
+
+            // Update pagination controls
+            updatePagination(total);
+        }
+
+        function updatePagination(total) {
+            if (!paginationControls) return;
+            const totalPages = Math.ceil(total / itemsPerPage);
+            paginationControls.innerHTML = '';
+
+            if (totalPages <= 1) return;
+
+            // Previous button
+            const prevBtn = document.createElement('button');
+            prevBtn.className = 'pagination-btn';
+            prevBtn.textContent = '← Previous';
+            prevBtn.disabled = currentPage === 1;
+            prevBtn.onclick = () => {
+                if (currentPage > 1) {
+                    currentPage--;
+                    updateDisplay();
+                }
+            };
+            paginationControls.appendChild(prevBtn);
+
+            // Page numbers
+            for (let i = 1; i <= totalPages; i++) {
+                if (i === 1 || i === totalPages || (i >= currentPage - 1 && i <= currentPage + 1)) {
+                    const pageBtn = document.createElement('button');
+                    pageBtn.className = 'pagination-btn' + (i === currentPage ? ' active' : '');
+                    pageBtn.textContent = i;
+                    pageBtn.onclick = () => {
+                        currentPage = i;
+                        updateDisplay();
+                    };
+                    paginationControls.appendChild(pageBtn);
+                } else if (i === currentPage - 2 || i === currentPage + 2) {
+                    const ellipsis = document.createElement('span');
+                    ellipsis.textContent = '...';
+                    ellipsis.style.padding = '0.5rem';
+                    paginationControls.appendChild(ellipsis);
+                }
+            }
+
+            // Next button
+            const nextBtn = document.createElement('button');
+            nextBtn.className = 'pagination-btn';
+            nextBtn.textContent = 'Next →';
+            nextBtn.disabled = currentPage === totalPages;
+            nextBtn.onclick = () => {
+                if (currentPage < totalPages) {
+                    currentPage++;
+                    updateDisplay();
+                }
+            };
+            paginationControls.appendChild(nextBtn);
+        }
+
+        // Initial display
+        updateDisplay();
+
+        // Animate cards on scroll
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.style.opacity = '1';
+                    entry.target.style.transform = 'translateY(0)';
+                }
+            });
+        }, { threshold: 0.1 });
+        
+        allCards.forEach(card => {
+            observer.observe(card);
+        });
+    }
+});
+</script>
+{% endblock %}
